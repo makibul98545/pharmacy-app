@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MM LifeCare Medical</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #eef2f7;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3c72, #2a5298);
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 20px;
+        }
+
+        .sidebar h5 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .sidebar-link {
+            display: block;
+            color: #cfd8ff;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px 10px;
+            font-size: 14px;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+            width: calc(100% - 220px);
+            position: relative;
+        }
+
+        /* CARDS */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* TABLE */
+        .table {
+            font-size: 14px;
+        }
+
+        .table thead {
+            background-color: #1e3c72;
+            color: white;
+        }
+
+        /* BUTTONS */
+        .btn {
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #2a5298;
+            border: none;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+
+        .btn-warning {
+            background-color: #f0ad4e;
+            border: none;
+        }
+
+        /* BADGES */
+        .badge {
+            font-size: 12px;
+            padding: 5px 8px;
+        }
+
+        /* LOGOUT BUTTON */
+        .logout-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+
+        /* HEADINGS */
+        h3, h4, h5 {
+            font-weight: 600;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="d-flex">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h5>💊 MM LifeCare</h5>
+
+        <a href="/" class="sidebar-link">Dashboard</a>
+        <a href="/purchase" class="sidebar-link">Purchase</a>
+        <a href="/sales" class="sidebar-link">Sales</a>
+        <a href="/stock" class="sidebar-link">Stock</a>
+        <a href="/expiry" class="sidebar-link">Expiry Alerts</a>
+        <a href="/invoices" class="sidebar-link">Invoices</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- 🔴 LOGOUT BUTTON -->
+        <a href="/logout" class="btn btn-danger btn-sm logout-btn">Logout</a>
+
+        {% block content %}{% endblock %}
+    </div>
+
+</div>
+
+</body>
+</html>
