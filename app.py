@@ -10,6 +10,27 @@ from flask import redirect
 
 init_db()
 
+# 🔹 CREATE DEFAULT ADMIN IF NOT EXISTS
+conn = get_connection()
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    role TEXT
+)
+""")
+
+cursor.execute("""
+INSERT OR IGNORE INTO users (username, password, role)
+VALUES ('admin', 'admin123', 'admin')
+""")
+
+conn.commit()
+conn.close()
+
 def get_connection():
     return sqlite3.connect("pharmacy.db", timeout=10, check_same_thread=False)
 
