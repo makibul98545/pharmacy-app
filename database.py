@@ -111,6 +111,11 @@ def init_db():
     )
     """)
 
+    cursor.execute("""
+    ALTER TABLE sales_items
+    ADD COLUMN IF NOT EXISTS medicine_name TEXT
+    """)
+
     # Invoice Master
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS invoice_master (
@@ -120,5 +125,21 @@ def init_db():
         total REAL
     )
     """)
+
+    try:
+        cursor.execute("ALTER TABLE purchase_register ADD COLUMN date_new DATE")
+        cursor.execute("UPDATE purchase_register SET date_new = TO_DATE(date, 'YYYY-MM-DD')")
+        cursor.execute("ALTER TABLE purchase_register DROP COLUMN date")
+        cursor.execute("ALTER TABLE purchase_register RENAME COLUMN date_new TO date")
+    except:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE purchase_register ADD COLUMN expiry_new DATE")
+        cursor.execute("UPDATE purchase_register SET expiry_new = TO_DATE(expiry_date, 'YYYY-MM-DD')")
+        cursor.execute("ALTER TABLE purchase_register DROP COLUMN expiry_date")
+        cursor.execute("ALTER TABLE purchase_register RENAME COLUMN expiry_new TO expiry_date")
+    except:
+        pass
 
     conn.close()

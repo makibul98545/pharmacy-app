@@ -4,6 +4,10 @@
 <head>
     <title>MM LifeCare Medical</title>
 
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script>
@@ -727,13 +731,44 @@ document.addEventListener("DOMContentLoaded", function() {
                     yearSelect.value = inst.currentYear;
                 });
             }
+
         });   
     });
 
+    // ===== AUTO ALERT SYSTEM =====
+
+    const expiry30 = {{ days_30 if days_30 is defined else 0 }};
+    const lowStock = {{ low_stock if low_stock is defined else 0 }};
+    const criticalStock = {{ critical_stock if critical_stock is defined else 0 }};
+
+    setTimeout(() => {
+
+        let delay = 0;
+
+        if (criticalStock > 0) {
+            setTimeout(() => {
+            showToast("🚨 Critical stock: " + criticalStock + " items", "error");
+            }, delay);
+            delay += 1200;
+        }
+
+        if (lowStock > 0) {
+            setTimeout(() => {
+            showToast("⚠️ Low stock: " + lowStock + " items", "warning");
+            }, delay);
+            delay += 1200;
+        }
+
+        if (expiry30 > 0) {
+            setTimeout(() => {
+            showToast("⏳ Near expiry: " + expiry30 + " items", "info");
+            }, delay);
+        }
+
+    }, 800);
+
 });
 </script>
-
-
 
 <body>
 
@@ -741,7 +776,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     <div style="text-align:center; margin-bottom:20px; color:white;">
 
-        <img src="{{ session.get('profile_pic', 'https://cdn-icons-png.flaticon.com/512/149/149071.png') }}"
+        <img src="{{ session.get('profile_pic') or '/static/icons/icon-192.png' }}">
              id="profileImage"
              style="width:60px; height:60px; border-radius:50%; margin-bottom:10px; cursor:pointer;">
 
@@ -1107,6 +1142,21 @@ window.addEventListener("load", function () {
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     document.body.style.opacity = 1;
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js')
+    .then(() => console.log("PWA Ready"))
+    .catch(err => console.log("SW Error", err));
+}
+</script>
+
+<script>
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+    console.log("New version activated");
+    window.location.reload();
 });
 </script>
 

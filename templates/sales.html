@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let row = this.closest("tr");
             let qtyInput = row.querySelector("input");
             let qty = parseInt(qtyInput.value) || 1;
-            let medicine = row.children[0].innerText;
+            let medicine = row.querySelector("td").innerText;
 
             let formData = new FormData();
             formData.append("medicine_name", medicine);

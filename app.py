@@ -18,8 +18,11 @@ cloudinary.config(
 )
 
 
-app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "fallback_key")
+app = Flask(__name__, static_folder='static')
+secret = os.getenv("SECRET_KEY")
+if not secret:
+    raise Exception("❌ SECRET_KEY missing in environment")
+app.secret_key = secret
 
 UPDATE_LOG = {
     "v1.1.0": [
@@ -50,7 +53,11 @@ def notify(message, category="success"):
 # ✅ CACHE CONTROL FIX
 @app.after_request
 def add_header(response):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    if request.path.startswith("/static"):
+        response.headers["Cache-Control"] = "public, max-age=31536000"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
@@ -60,7 +67,10 @@ def add_header(response):
 def require_login():
     if request.endpoint is None:
         return
-    if request.endpoint in ["login", "static", "forgot_username", "forgot_password"]:
+    if request.endpoint in [
+        "login", "static", "forgot_username", "forgot_password",
+        "version", "check_db"
+    ]:
         return
     if "user_id" not in session:
         return redirect("/login")
@@ -102,14 +112,22 @@ def home():
     today_str = datetime.now().strftime("%Y-%m-%d")
     month_str = datetime.now().strftime("%Y-%m")
 
+    params = []
+
     if filter_type == "today":
-        date_condition = f"WHERE date = '{today_str}'"
+        date_condition = "WHERE date = %s"
+        params.append(today_str)
 
     elif filter_type == "month":
-        date_condition = f"WHERE TO_CHAR(TO_DATE(date, 'YYYY-MM-DD'), 'YYYY-MM') = '{month_str}'"
+        date_condition = "WHERE TO_CHAR(TO_DATE(date, 'YYYY-MM-DD'), 'YYYY-MM') = %s"
+        params.append(month_str)
 
     elif filter_type == "custom" and start_date and end_date:
-        date_condition = f"WHERE date BETWEEN '{start_date}' AND '{end_date}'"
+        date_condition = "WHERE date BETWEEN %s AND %s"
+        params.extend([start_date, end_date])
+
+    else:
+       date_condition = ""
 
     print("FILTER:", filter_type)
     print("DATE CONDITION:", date_condition)     
@@ -120,25 +138,30 @@ def home():
     monthly_labels = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
     monthly_values = [0]*12
 
-    cursor.execute(f"""
+    query = f"""
     SELECT EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD')), SUM(total)
     FROM invoice_master
     {date_condition}
-    GROUP BY EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD'))            
-    """)
+    GROUP BY EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD'))  
+    """
+    cursor.execute(query, tuple(params))
+    data = cursor.fetchall()
 
-    for month, total in cursor.fetchall():
+    total_sold = sum([row[1] for row in data if row[1]])
+
+    for month, total in data:
         monthly_values[int(month)-1] = total
 
     weekly_labels = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
     weekly_values = [0]*7
 
-    cursor.execute(f"""
+    query = f"""
     SELECT EXTRACT(DOW FROM TO_DATE(date, 'YYYY-MM-DD')), SUM(total)
     FROM invoice_master
     {date_condition}               
     GROUP BY EXTRACT(DOW FROM TO_DATE(date, 'YYYY-MM-DD'))
-    """)
+    """
+    cursor.execute(query, tuple(params))
 
     for day, total in cursor.fetchall():
         weekly_values[int(day)] = total
@@ -148,13 +171,6 @@ def home():
 
     cursor.execute("SELECT SUM(quantity) FROM purchase_register WHERE quantity <= 2")
     critical_stock = cursor.fetchone()[0] or 0
-
-    # TOTAL SOLD
-    cursor.execute(f"""
-    SELECT COALESCE(SUM(total),0) FROM invoice_master
-    {date_condition}
-    """)
-    total_sold = cursor.fetchone()[0]
 
     # EXPIRY ANALYSIS
     cursor.execute("SELECT expiry_date, quantity FROM purchase_register WHERE quantity > 0")
@@ -184,7 +200,7 @@ def home():
     # TOP SELLING MEDICINES
     cursor.execute("""
      SELECT medicine_name, SUM(quantity) as total_qty
-    FROM purchase_register
+    FROM sales_items
     GROUP BY medicine_name
     ORDER BY total_qty DESC
     LIMIT 5
@@ -197,13 +213,10 @@ def home():
 
     # ===== PROFIT CALCULATION =====
     cursor.execute("""
-    SELECT 
-        COALESCE(SUM((mrp - purchase_rate) * quantity), 0)
-    FROM purchase_register
-    WHERE quantity > 0
+    SELECT COALESCE(SUM(total),0)
+    FROM invoice_master
     """)
-
-    total_profit = cursor.fetchone()[0]  
+    total_profit = cursor.fetchone()[0] * 0.2 
 
     conn.close()
 
@@ -248,6 +261,16 @@ def upload_profile():
         return jsonify({"status": "error"})
 
     file = request.files["profile_pic"]
+
+    if not file.filename.lower().endswith((".png", ".jpg", ".jpeg")):
+        return jsonify({"status": "error", "message": "Invalid file type"})
+
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+
+    if size > 2 * 1024 * 1024:
+        return jsonify({"status": "error", "message": "File too large (max 2MB)"})
 
     if file.filename == "":
         return jsonify({"status": "error"})
@@ -332,6 +355,10 @@ def forgot_password():
     if request.method == "POST":
         username = request.form.get("username")
         new_password = request.form.get("new_password")
+
+        if len(new_password) < 6:
+            notify("Password must be at least 6 characters", "error")
+            return render_template("forgot_password.html")
 
         conn = get_connection()
         cursor = conn.cursor()
@@ -570,6 +597,19 @@ def sell():
     updated_stock = [{
         "medicine": medicine,
         "stock": data[0] - qty
+
+    cursor.execute("""
+    INSERT INTO sales_items
+    (medicine_name, quantity, mrp, total, sale_date)
+    VALUES (%s, %s, %s, %s, %s)
+    """, (
+        item["medicine"],
+        item["qty"],
+        item["mrp"],
+        item["total"],
+        datetime.now().strftime("%Y-%m-%d")
+    ))
+
     }]
 
     return jsonify({
@@ -605,6 +645,17 @@ def update_qty():
     session["bill"] = bill
 
     return jsonify({"status": "success"})
+
+@app.route("/remove_item", methods=["POST"])
+def remove_item():
+    index = int(request.form["index"])
+    bill = session.get("bill", [])
+
+    if 0 <= index < len(bill):
+        bill.pop(index)
+        session["bill"] = bill
+
+    return redirect("/bill")
 
 # ---------------- SALES ----------------
 @app.route("/sales")
@@ -703,8 +754,11 @@ def finalize():
     VALUES (%s, %s, %s)
     """, (invoice_no, datetime.now().strftime("%Y-%m-%d"), total))
 
+    session.pop("bill", None)
     conn.commit()
     conn.close()
+
+    return render_template("success.html", invoice_no=invoice_no)
 
     session["bill"] = []
     session["last_invoice"] = invoice_no

@@ -40,8 +40,8 @@ document.getElementById("searchInvoice").addEventListener("keyup", function() {
     let rows = document.querySelectorAll("#invoiceTable tbody tr");
 
     rows.forEach(row => {
-        let invoice = row.children[0].innerText.toLowerCase();
-        row.style.display = invoice.includes(value) ? "" : "none";
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(value) ? "" : "none";
     });
 });
 </script>

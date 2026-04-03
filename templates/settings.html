@@ -62,6 +62,13 @@
 
                     <button class="btn btn-success w-100">Save Name</button>
                 </form>
+
+                {% if toast %}
+                <script>
+                    showToast("{{ toast.message }}", "{{ toast.category }}");
+                </script>
+                {% endif %}
+
             </div>
         </div>
 

@@ -29,7 +29,7 @@
         </div>
 
         <div class="date-wrapper">
-            <input type="date" id="startDate" class="form-control date-input">
+            <input type="date" id="startDate" class="form-control date-input" style="display:none;">
         </div>
 
         <div class="date-wrapper">
@@ -47,6 +47,13 @@
 </div>
 
 <script>
+document.getElementById("filterType").addEventListener("change", function() {
+    const custom = this.value === "custom";
+    document.getElementById("startDate").style.display = custom ? "block" : "none";
+    document.getElementById("endDate").style.display = custom ? "block" : "none";
+});
+</script>
+<script>
 function applyFilter() {
     const type = document.getElementById("filterType").value;
     const start = document.getElementById("startDate").value;
@@ -55,7 +62,7 @@ function applyFilter() {
     let url = "/?filter=" + type;
 
     if (type === "custom") {
-        url += "&start=" + start + "&end=" + end;
+        url += "&start=" + encodeURIComponent(start) + "&end=" + encodeURIComponent(end);
     }
 
     window.location.href = url;

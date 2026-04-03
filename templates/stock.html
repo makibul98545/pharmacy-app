@@ -153,4 +153,12 @@ document.getElementById("searchStock").addEventListener("keyup", function() {
 });
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const today = new Date().toISOString().split("T")[0];
+    const input = document.getElementById("todayDate");
+    if (input) input.value = today;
+});
+</script>
+
 {% endblock %}
