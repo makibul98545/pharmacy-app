@@ -7,7 +7,16 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # ✅ NEW IMPORTS (SAFE)
 import os
-from werkzeug.utils import secure_filename
+
+import cloudinary
+import cloudinary.uploader
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret=os.getenv("API_SECRET")
+)
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback_key")
@@ -30,10 +39,6 @@ APP_VERSION = list(UPDATE_LOG.keys())[0]
 
 def setup():
     init_db()  
-
-# ✅ UPLOAD CONFIG (SAFE)
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ✅ ✅ CENTRAL NOTIFICATION SYSTEM
 def notify(message, category="success"):
@@ -247,15 +252,25 @@ def upload_profile():
     if file.filename == "":
         return jsonify({"status": "error"})
 
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+    result = cloudinary.uploader.upload(file)
+    image_url = result["secure_url"]
 
-    session["profile_pic"] = "/" + filepath
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE users SET profile_pic=%s WHERE id=%s",
+        (image_url, session["user_id"])
+    )
+
+    conn.commit()
+    conn.close()
+
+    session["profile_pic"] = image_url
 
     return jsonify({
         "status": "success",
-        "path": "/" + filepath
+        "path": image_url
     })
 
 # LOGIN
@@ -267,7 +282,7 @@ def login():
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, password, role FROM users WHERE username=%s", (username,))
+        cursor.execute("SELECT id, password, role, profile_pic FROM users WHERE username=%s", (username,))
         user = cursor.fetchone()
         conn.close()
 
@@ -275,6 +290,7 @@ def login():
             session["user_id"] = user[0]
             session["role"] = user[2]
             session["display_name"] = username
+            session["profile_pic"] = user[3]
             return redirect("/")
         else:
             notify("Invalid credentials", "error")

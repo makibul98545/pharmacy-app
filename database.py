@@ -81,9 +81,11 @@ def init_db():
         id SERIAL PRIMARY KEY,
         username TEXT UNIQUE,
         password TEXT,
-        role TEXT
+        role TEXT,
+        profile_pic TEXT
     )
     """)
+    cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_pic TEXT")
 
     # ✅ HASHED ADMIN USER (FIXED)
     cursor.execute("""
