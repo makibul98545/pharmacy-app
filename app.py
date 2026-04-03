@@ -1,6 +1,7 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template, request, session, jsonify, redirect
 from datetime import datetime
-from database import init_db
 from database import get_connection, init_db
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -9,7 +10,7 @@ import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = "pharmacy_secret_key"
+app.secret_key = os.getenv("SECRET_KEY", "fallback_key")
 
 UPDATE_LOG = {
     "v1.1.0": [
@@ -28,8 +29,7 @@ UPDATE_LOG = {
 APP_VERSION = list(UPDATE_LOG.keys())[0]
 
 def setup():
-    init_db()
-setup()    
+    init_db()  
 
 # ✅ UPLOAD CONFIG (SAFE)
 UPLOAD_FOLDER = "static/uploads"
@@ -101,7 +101,7 @@ def home():
         date_condition = f"WHERE date = '{today_str}'"
 
     elif filter_type == "month":
-        date_condition = f"WHERE substr(date,1,7) = '{month_str}'"
+        date_condition = f"WHERE TO_CHAR(TO_DATE(date, 'YYYY-MM-DD'), 'YYYY-MM') = '{month_str}'"
 
     elif filter_type == "custom" and start_date and end_date:
         date_condition = f"WHERE date BETWEEN '{start_date}' AND '{end_date}'"
@@ -116,10 +116,10 @@ def home():
     monthly_values = [0]*12
 
     cursor.execute(f"""
-    SELECT strftime('%m', date), SUM(total)
+    SELECT EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD')), SUM(total)
     FROM invoice_master
     {date_condition}
-    GROUP BY strftime('%m', date)               
+    GROUP BY EXTRACT(MONTH FROM TO_DATE(date, 'YYYY-MM-DD'))            
     """)
 
     for month, total in cursor.fetchall():
@@ -129,10 +129,10 @@ def home():
     weekly_values = [0]*7
 
     cursor.execute(f"""
-    SELECT strftime('%w', date), SUM(total)
+    SELECT EXTRACT(DOW FROM TO_DATE(date, 'YYYY-MM-DD')), SUM(total)
     FROM invoice_master
     {date_condition}               
-    GROUP BY strftime('%w', date)
+    GROUP BY EXTRACT(DOW FROM TO_DATE(date, 'YYYY-MM-DD'))
     """)
 
     for day, total in cursor.fetchall():
@@ -146,7 +146,7 @@ def home():
 
     # TOTAL SOLD
     cursor.execute(f"""
-    SELECT IFNULL(SUM(total),0) FROM invoice_master
+    SELECT COALESCE(SUM(total),0) FROM invoice_master
     {date_condition}
     """)
     total_sold = cursor.fetchone()[0]
@@ -193,7 +193,7 @@ def home():
     # ===== PROFIT CALCULATION =====
     cursor.execute("""
     SELECT 
-        IFNULL(SUM((mrp - purchase_rate) * quantity), 0)
+        COALESCE(SUM((mrp - purchase_rate) * quantity), 0)
     FROM purchase_register
     WHERE quantity > 0
     """)
@@ -440,7 +440,7 @@ def expiry():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT medicine_name, batch_no, expiry_date, SUM(quantity)
+    SELECT medicine_name, batch_no, MAX(expiry_date), SUM(quantity)
     FROM purchase_register
     GROUP BY medicine_name, batch_no
     HAVING SUM(quantity) > 0
@@ -707,4 +707,5 @@ def version():
 
 # RUN
 if __name__ == "__main__":
-    app.run(debug=True)
+    init_db()
+    app.run(debug=False)
