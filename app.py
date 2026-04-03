@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, jsonify, redirect
-import sqlite3
 from datetime import datetime
 from database import init_db
+from database import get_connection, init_db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # ✅ NEW IMPORTS (SAFE)
@@ -27,14 +27,13 @@ UPDATE_LOG = {
 
 APP_VERSION = list(UPDATE_LOG.keys())[0]
 
-init_db()
+@app.before_first_request
+def setup():
+    init_db()
 
 # ✅ UPLOAD CONFIG (SAFE)
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def get_connection():
-    return sqlite3.connect("pharmacy.db", timeout=10, check_same_thread=False)
 
 # ✅ ✅ CENTRAL NOTIFICATION SYSTEM
 def notify(message, category="success"):
@@ -268,7 +267,7 @@ def login():
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, password, role FROM users WHERE username=?", (username,))
+        cursor.execute("SELECT id, password, role FROM users WHERE username=%s", (username,))
         user = cursor.fetchone()
         conn.close()
 
@@ -296,7 +295,7 @@ def forgot_username():
 
         # ✅ FIX: SUPPORT BOTH ID AND USERNAME
         cursor.execute(
-            "SELECT username FROM users WHERE id=? OR username=?",
+            "SELECT username FROM users WHERE id=%s OR username=%s",
             (user_input, user_input)
         )
 
@@ -320,12 +319,12 @@ def forgot_password():
 
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE username=?", (username,))
+        cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
         user = cursor.fetchone()
 
         if user:
             hashed = generate_password_hash(new_password)
-            cursor.execute("UPDATE users SET password=? WHERE username=?", (hashed, username))
+            cursor.execute("UPDATE users SET password=%s WHERE username=%s", (hashed, username))
             conn.commit()
             conn.close()
 
@@ -347,12 +346,12 @@ def change_password():
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT password FROM users WHERE id=?", (session["user_id"],))
+        cursor.execute("SELECT password FROM users WHERE id=%s", (session["user_id"],))
         user = cursor.fetchone()
 
         if user and check_password_hash(user[0], current):
             new_hash = generate_password_hash(new)
-            cursor.execute("UPDATE users SET password=? WHERE id=?", (new_hash, session["user_id"]))
+            cursor.execute("UPDATE users SET password=%s WHERE id=%s", (new_hash, session["user_id"]))
             conn.commit()
             conn.close()
 
@@ -376,7 +375,7 @@ def change_username():
         cursor = conn.cursor()
 
         try:
-            cursor.execute("UPDATE users SET username=? WHERE id=?", (new_username, session["user_id"]))
+            cursor.execute("UPDATE users SET username=%s WHERE id=%s", (new_username, session["user_id"]))
             conn.commit()
             conn.close()
 
@@ -420,7 +419,7 @@ def purchase():
         INSERT INTO purchase_register
         (date, supplier, medicine_name, batch_no, expiry_date,
          quantity, purchase_rate, mrp, gst_percent, gst_amount, total_amount)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data["date"], data["supplier"], data["medicine_name"],
             data["batch_no"], data["expiry_date"],
@@ -522,7 +521,7 @@ def sell():
     cursor.execute("""
         SELECT SUM(quantity), MAX(mrp)
         FROM purchase_register
-        WHERE medicine_name=?
+        WHERE medicine_name=%s
     """, (medicine,))
     data = cursor.fetchone()
 
@@ -655,7 +654,7 @@ def finalize():
 
         cursor.execute("""
             SELECT id, quantity FROM purchase_register
-            WHERE medicine_name=? AND quantity > 0
+            WHERE medicine_name=%s AND quantity > 0
             ORDER BY expiry_date ASC
         """, (medicine,))
 
@@ -668,15 +667,15 @@ def finalize():
             if stock >= qty_to_reduce:
                 cursor.execute("""
                     UPDATE purchase_register
-                    SET quantity = quantity - ?
-                    WHERE id=?
+                    SET quantity = quantity - %s
+                    WHERE id=%s
                 """, (qty_to_reduce, batch_id))
                 qty_to_reduce = 0
             else:
                 cursor.execute("""
                     UPDATE purchase_register
                     SET quantity = 0
-                    WHERE id=?
+                    WHERE id=%s
                 """, (batch_id,))
                 qty_to_reduce -= stock
 
@@ -685,7 +684,7 @@ def finalize():
 
     cursor.execute("""
     INSERT INTO invoice_master (invoice_no, date, total)
-    VALUES (?, ?, ?)
+    VALUES (%s, %s, %s)
     """, (invoice_no, datetime.now().strftime("%Y-%m-%d"), total))
 
     conn.commit()

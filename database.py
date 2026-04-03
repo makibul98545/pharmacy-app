@@ -9,6 +9,7 @@ def get_connection():
     return conn
 
 def init_db():
+    print("🔥 INIT_DB RUNNING")
     conn = get_connection()
     cursor = conn.cursor()
 
