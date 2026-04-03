@@ -27,9 +27,9 @@ UPDATE_LOG = {
 
 APP_VERSION = list(UPDATE_LOG.keys())[0]
 
-@app.before_first_request
 def setup():
     init_db()
+setup()    
 
 # ✅ UPLOAD CONFIG (SAFE)
 UPLOAD_FOLDER = "static/uploads"
