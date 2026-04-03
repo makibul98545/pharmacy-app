@@ -1,19 +1,21 @@
-import sqlite3
+import os
+import psycopg2
 from werkzeug.security import generate_password_hash
 
-DB_NAME = "pharmacy.db"
-
 def get_connection():
-    return sqlite3.connect(DB_NAME)
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    conn = psycopg2.connect(DATABASE_URL)
+    conn.autocommit = True
+    return conn
 
 def init_db():
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
 
     # Medicine Master
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS medicine_master (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         medicine_name TEXT,
         hsn_code TEXT,
         gst_percent REAL,
@@ -26,7 +28,7 @@ def init_db():
     # Batch Master
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS batch_master (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         medicine_name TEXT,
         batch_no TEXT,
         expiry_date TEXT,
@@ -40,7 +42,7 @@ def init_db():
     # Purchase Register
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS purchase_register (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         date TEXT,
         supplier TEXT,
         medicine_name TEXT,
@@ -58,7 +60,7 @@ def init_db():
     # Sales Register
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS sales_register (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         bill_no TEXT,
         date TEXT,
         medicine_name TEXT,
@@ -75,7 +77,7 @@ def init_db():
     # Users Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         username TEXT UNIQUE,
         password TEXT,
         role TEXT
@@ -84,14 +86,15 @@ def init_db():
 
     # ✅ HASHED ADMIN USER (FIXED)
     cursor.execute("""
-    INSERT OR IGNORE INTO users (username, password, role)
-    VALUES ('admin', ?, 'admin')
-    """, (generate_password_hash("admin123"),))
+    INSERT INTO users (username, password, role)
+    VALUES (%s, %s, %s)
+    ON CONFLICT (username) DO NOTHING
+    """, ("admin", generate_password_hash("admin123"), "admin"))               
 
     # Sales Items
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS sales_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         invoice_no TEXT,
         medicine_id INTEGER,
         batch_id INTEGER,
@@ -108,12 +111,11 @@ def init_db():
     # Invoice Master
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS invoice_master (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         invoice_no TEXT UNIQUE,
         date TEXT,
         total REAL
     )
     """)
 
-    conn.commit()
     conn.close()
