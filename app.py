@@ -705,6 +705,15 @@ def success():
 def version():
     return {"version": APP_VERSION}
 
+@app.route("/check_db")
+def check_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM purchase_register")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return {"rows": count}
+
 # RUN
 if __name__ == "__main__":
     init_db()
