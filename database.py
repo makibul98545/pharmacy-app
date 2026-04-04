@@ -3,10 +3,12 @@ import psycopg2
 from werkzeug.security import generate_password_hash
 
 def get_connection():
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.autocommit = True
-    return conn
+    db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        db_url = "postgresql://postgres:password@localhost:5432/pharmacy_db"
+
+    return psycopg2.connect(db_url, sslmode="prefer")
 
 def init_db():
     print("🔥 INIT_DB RUNNING")
@@ -142,4 +144,5 @@ def init_db():
     except:
         pass
 
+    conn.commit()
     conn.close()

@@ -597,20 +597,24 @@ def sell():
     updated_stock = [{
         "medicine": medicine,
         "stock": data[0] - qty
-
-    cursor.execute("""
-    INSERT INTO sales_items
-    (medicine_name, quantity, mrp, total, sale_date)
-    VALUES (%s, %s, %s, %s, %s)
-    """, (
-        item["medicine"],
-        item["qty"],
-        item["mrp"],
-        item["total"],
-        datetime.now().strftime("%Y-%m-%d")
-    ))
-
     }]
+
+    # SAVE SALE (IMPORTANT FIX)
+    for item in bill:
+        cursor.execute("""
+        INSERT INTO sales_items
+        (medicine_name, quantity, mrp, total, sale_date)
+        VALUES (%s, %s, %s, %s, %s)
+        """, (
+            item["medicine"],
+            item["qty"],
+            item["mrp"],
+            item["total"],
+            datetime.now().strftime("%Y-%m-%d")
+        ))  
+
+    conn.commit()
+    conn.close()  
 
     return jsonify({
         "status": "success",
@@ -758,10 +762,10 @@ def finalize():
     conn.commit()
     conn.close()
 
-    return render_template("success.html", invoice_no=invoice_no)
-
     session["bill"] = []
     session["last_invoice"] = invoice_no
+
+    return render_template("success.html", invoice_no=invoice_no)
 
     return redirect("/success")
 
