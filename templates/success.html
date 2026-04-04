@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block content %}
@@ -25,4 +26,33 @@
 
 </div>
 
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-5 text-center">
+
+    <h2 class="text-success mb-3">✔ Bill Generated Successfully</h2>
+
+    <h4 class="mb-4">
+        Invoice No: 
+        <span class="text-primary">{{ invoice_no }}</span>
+    </h4>
+
+    <div class="d-flex justify-content-center gap-3">
+
+        <a href="/sales" class="btn btn-primary">
+            ➕ New Sale
+        </a>
+
+        <a href="/invoices" class="btn btn-secondary">
+            📄 View Invoices
+        </a>
+
+    </div>
+
+</div>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 {% endblock %}

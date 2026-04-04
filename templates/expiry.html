@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block content %}
@@ -41,4 +42,49 @@
 
 </div>
 
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <h4 class="mb-4">⚠️ Expiry Alert Dashboard</h4>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Medicine</th>
+                <th>Batch</th>
+                <th>Expiry</th>
+                <th>Qty</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for item in data %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+
+            <td>
+                {% if item[4] == "Expired" %}
+                    <span class="badge bg-danger">Expired</span>
+                {% elif item[4] == "Near Expiry" %}
+                    <span class="badge bg-warning text-dark">Near Expiry</span>
+                {% else %}
+                    <span class="badge bg-success">Safe</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 {% endblock %}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block content %}
@@ -29,4 +30,37 @@
 
 </div>
 
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="height:100vh;">
+
+<div class="card p-4" style="width:300px;">
+    <h4 class="mb-3 text-center">Login</h4>
+
+    <form method="POST">
+        <input type="text" name="username" class="form-control mb-2" placeholder="Username" required>
+        <input type="password" name="password" class="form-control mb-3" placeholder="Password" required>
+
+        <button class="btn btn-primary w-100">Login</button>
+    </form>
+
+    {% if toast %}
+    <script>
+        showToast("{{ toast.message }}", "{{ toast.category }}");
+    </script>
+    {% endif %}
+
+    <div class="text-center mt-3">
+        <a href="/forgot_username" class="d-block">Forgot Username?</a>
+        <a href="/forgot_password" class="d-block">Forgot Password?</a>
+    </div>
+
+</div>
+
+</div>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 {% endblock %}

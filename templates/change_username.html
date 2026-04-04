@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block content %}
@@ -28,4 +29,36 @@
 </script>
 {% endif %}
 
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4" style="max-width: 400px; margin: auto;">
+
+    <h4 class="mb-4 text-center">👤 Change Username</h4>
+
+    <form method="POST">
+        <input type="text" name="new_username" class="form-control mb-3" placeholder="New Username" required>
+
+        <button type="submit" class="btn btn-primary w-100">Update Username</button>
+    </form>
+
+    {% if error %}
+        <div class="alert alert-danger mt-3 text-center">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+        <div class="alert alert-success mt-3 text-center">{{ success }}</div>
+    {% endif %}
+
+</div>
+
+{% if toast %}
+<script>
+    showToast("{{ toast.message }}", "{{ toast.category }}");
+</script>
+{% endif %}
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 {% endblock %}

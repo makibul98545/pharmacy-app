@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block content %}
@@ -383,4 +384,391 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<h4 class="mb-3">Dashboard</h4>
+
+<div class="ticker mb-3">
+    <div class="ticker-track">
+        💊 Live Sales • Revenue Growing • Stock Monitoring • MM LifeCare Dashboard 🚀
+    </div>
+</div>
+
+<div style="font-size:12px; opacity:0.7;">
+    Current Filter: {{ request.args.get('filter', 'all') }}
+</div>
+
+<!-- ===== DATE FILTER ===== -->
+<div class="card p-3 mb-3">
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <select id="filterType" class="form-control">
+                <option value="all" {{ 'selected' if request.args.get('filter','all') == 'all' else '' }}>All Time</option>
+                <option value="today" {{ 'selected' if request.args.get('filter') == 'today' else '' }}>Today</option>
+                <option value="month" {{ 'selected' if request.args.get('filter') == 'month' else '' }}>This Month</option>
+                <option value="custom" {{ 'selected' if request.args.get('filter') == 'custom' else '' }}>Custom</option>
+            </select>
+        </div>
+
+        <div class="date-wrapper">
+            <input type="date" id="startDate" class="form-control date-input" style="display:none;">
+        </div>
+
+        <div class="date-wrapper">
+            <input type="date" id="endDate" class="form-control date-input">
+        </div>
+
+        <div class="col-md-3">
+            <button onclick="applyFilter()" class="btn btn-primary w-100">
+                Apply Filter
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+document.getElementById("filterType").addEventListener("change", function() {
+    const custom = this.value === "custom";
+    document.getElementById("startDate").style.display = custom ? "block" : "none";
+    document.getElementById("endDate").style.display = custom ? "block" : "none";
+});
+</script>
+<script>
+function applyFilter() {
+    const type = document.getElementById("filterType").value;
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+
+    let url = "/?filter=" + type;
+
+    if (type === "custom") {
+        url += "&start=" + encodeURIComponent(start) + "&end=" + encodeURIComponent(end);
+    }
+
+    window.location.href = url;
+}
+</script>
+
+<div class="row g-3 mb-3">
+
+    <!-- Total Sold -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-profit text-white">
+            <div class="card-body text-center">
+                <div style="font-size:22px; margin-bottom:6px;">💊</div>
+                <h6>Total Medicines Sold</h6>
+                <h3 class="counter dynamic-color">{{ total_sold or 0 }}</h3>
+            </div>
+        </div>    
+    </div>
+
+    <!-- Total Profit -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-profit text-white">
+            <div class="card-body text-center"> 
+                <div style="font-size:22px;">💰</div>   
+                <h6>Total Profit</h6>
+                <h3 class="counter dynamic-color">₹ {{ total_profit or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+    <!-- Expired -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-expired text-white">
+            <div class="card-body text-center">
+                <div style="font-size:22px;">❌</div>
+                <h6>Expired</h6>
+                <h3 class="counter dynamic-color">{{ expired or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+    <!-- 0–30 Days -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-warning text-white">    
+            <div class="card-body text-center">
+                <div style="font-size:22px;">⚠️</div>
+                <h6>0–30 Days</h6>
+                <h3 class="counter dynamic-color">{{ days_30 or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3 mb-3">
+
+    <!-- 31–60 Days -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-warning text-white">
+            <div class="card-body text-center">
+                <div style="font-size:22px;">⏳</div>
+                <h6>31–60 Days</h6>
+                <h3 class="counter dynamic-color">{{ days_60 or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+    <!-- 61–90 Days -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-warning text-white">
+            <div class="card-body text-center">
+                <div style="font-size:22px;">📅</div>
+                <h6>61–90 Days</h6>
+                <h3 class="counter dynamic-color">{{ days_90 or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+    <!-- Safe -->
+    <div class="col-md-4">
+        <div class="card dashboard-card card-safe text-white">
+            <div class="card-body text-center">
+                <div style="font-size:22px;">✅</div>
+                <h6>Safe (&gt;90 Days)</h6>
+                <h3 class="counter dynamic-color">{{ safe or 0 }}</h3>
+            </div>    
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== MONTHLY CHART ===== -->
+<div class="card p-3 mt-4">
+    <h5 class="mb-3">Monthly Sales</h5>
+    <canvas id="monthlyChart" height="100"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const ctx = document.getElementById('monthlyChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ monthly_labels | tojson | default([]) }},
+            datasets: [{
+                label: 'Sales (₹)',
+                data: {{ monthly_values | tojson | default([]) }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            },
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "rgba(200,200,200,0.1)"
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+<script>
+window.addEventListener("load", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {    
+    document.querySelectorAll(".dynamic-color").forEach(el => {
+        const value = parseInt(el.innerText.replace(/[^\d]/g, '')) || 0;
+
+        if (value === 0) el.style.color = "#aaa";
+        else if (value < 50) el.style.color = "#ff4d4f";
+        else if (value < 200) el.style.color = "#ffb300";
+        else el.style.color = "#00e676";
+    });
+});    
+</script>
+
+<!-- ===== STOCK ALERT ===== -->
+<div class="card p-3 mt-4">
+
+    <h5 class="mb-2">Stock Alert</h5>
+
+    <div id="stockAlertBox" style="padding:12px; border-radius:8px; font-weight:500;">
+        Checking stock status...
+    </div>
+
+</div>
+
+<!-- ===== WEEKLY PROFIT CHART ===== -->
+<div class="card p-3 mt-4">
+    <h5 class="mb-3">Weekly Profit</h5>
+    <canvas id="weeklyChart" height="100"></canvas>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const ctx2 = document.getElementById('weeklyChart');
+
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_labels | tojson | default([]) }},
+            datasets: [{
+                label: 'Profit (₹)',
+                data: {{ weekly_values | tojson | default([]) }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            animation: {
+                duration: 1200,
+                easing: 'easeOutQuart'
+            }
+        }    
+    });
+});
+</script>
+
+<!-- ===== TOP SELLING MEDICINES ===== -->
+<div class="card p-3 mt-4">
+    <h5 class="mb-3">Top Selling Medicines</h5>
+    <canvas id="topChart" height="100"></canvas>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const ctx3 = document.getElementById('topChart');
+
+    new Chart(ctx3, {
+        type: 'bar',
+        data: {
+            labels: {{ top_labels | tojson | default([]) }},
+            datasets: [{
+                label: 'Quantity Sold',
+                data: {{ top_values | tojson | default([]) }},
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',  // horizontal bar (Excel style)
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".counter").forEach(el => {
+        let target = parseInt(el.innerText.replace(/[^\d]/g, '')) || 0;
+        let count = 0;
+        let speed = Math.max(10, target / 40);
+
+        function update() {
+            count += speed;
+            if (count < target) {
+                el.innerText = Math.floor(count);
+                requestAnimationFrame(update);
+            } else {
+                el.innerText = target;
+            }
+        }
+
+        update();
+    });
+
+});
+</script>
+
+<script>
+setInterval(() => {
+    fetch(window.location.href, { cache: "no-store" })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            // Replace KPI values only (safe)
+            document.querySelectorAll(".counter").forEach((el, i) => {
+                const newVal = doc.querySelectorAll(".counter")[i];
+                if (newVal) {
+                    el.innerText = newVal.innerText;
+
+
+                    // re-run animation
+                    let target = parseInt(el.innerText.replace(/[^\d]/g, '')) || 0;
+                    let count = 0;
+                    let speed = Math.max(10, target / 40);
+
+                    function update() {
+                        count += speed;
+                        if (count < target) {
+                            el.innerText = Math.floor(count);
+                            requestAnimationFrame(update);
+                        } else {
+                            el.innerText = target;
+                        }
+                    }
+
+                    update();
+                }
+            });
+        });
+}, 30000); // refresh every 30 sec
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".date-wrapper").forEach(wrapper => {
+        wrapper.addEventListener("click", function () {
+            const input = this.querySelector("input");
+
+            if (input) {
+                input.click();
+                input.focus();
+            }
+        });
+    });
+
+});
+</script>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 {% endblock %}
