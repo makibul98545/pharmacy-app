@@ -99,6 +99,12 @@ def inject_user():
         latest_updates=latest_updates
     )
 
+@app.route("/fix-db")
+def fix_db():
+    from database import init_db
+    init_db()
+    return "DB fixed successfully"
+
 # HOME
 @app.route("/")
 def home():
