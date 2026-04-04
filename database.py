@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 import psycopg2
 from werkzeug.security import generate_password_hash
@@ -295,5 +294,4 @@ def init_db():
         pass
 
     conn.commit()
->>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
     conn.close()
