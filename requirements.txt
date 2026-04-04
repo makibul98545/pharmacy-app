@@ -1,12 +1,9 @@
-<<<<<<< HEAD
 flask
 psycopg2-binary
 python-dotenv
 gunicorn
-=======
 flask
 psycopg2-binary
 python-dotenv
 gunicorn
->>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
 cloudinary

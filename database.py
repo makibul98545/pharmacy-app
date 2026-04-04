@@ -146,7 +146,6 @@ def init_db():
         pass
 
     conn.commit()
-=======
 import os
 import psycopg2
 from werkzeug.security import generate_password_hash
