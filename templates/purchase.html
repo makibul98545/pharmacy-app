@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4 shadow-sm">
+
+    <h4 class="mb-4">📦 Purchase Entry</h4>
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <label>Date</label>
+                <div class="date-wrapper">
+                    <input type="text" name="date" class="form-control date-input" autocomplete="off">
+
+                    <!-- ✅ ADDED YEAR DROPDOWN -->
+                    
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label>Supplier</label>
+                <input type="text" name="supplier" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label>Medicine</label>
+                <input type="text" name="medicine_name" class="form-control" required>
+            </div>
+
+            <div class="col-md-3">
+                <label>Batch</label>
+                <input type="text" name="batch_no" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label>Expiry</label>
+                <div class="date-wrapper">
+                    <input type="text" name="expiry_date" class="form-control date-input" autocomplete="off">
+
+                    <!-- ✅ ADDED YEAR DROPDOWN -->
+                    
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <label>Qty</label>
+                <input type="number" name="quantity" class="form-control" required min="1">
+            </div>
+
+            <div class="col-md-2">
+                <label>PTR</label>
+                <input type="number" name="purchase_rate" class="form-control" required min="0">
+            </div>
+
+            <div class="col-md-2">
+                <label>MRP</label>
+                <input type="number" name="mrp" class="form-control" required min="0">
+            </div>
+
+            <div class="col-md-2">
+                <label>GST %</label>
+                <input type="number" name="gst_percent" class="form-control">
+            </div>
+
+        </div>
+
+        <button class="btn btn-primary mt-4">Save Purchase</button>
+
+    </form>
+
+</div>
+
+{% endblock %}
