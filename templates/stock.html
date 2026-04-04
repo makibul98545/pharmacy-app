@@ -1,0 +1,330 @@
+<<<<<<< HEAD
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Inventory Status</h4>
+        <input type="text" id="searchStock" class="form-control w-25" placeholder="Search medicine...">
+    </div>
+
+    <!-- 🔥 QUICK ADD STOCK -->
+    <div class="card p-3 mb-4 bg-light">
+
+        <h6 class="mb-3">➕ Quick Add Stock</h6>
+
+        <form method="POST" action="/purchase">
+            <div class="row g-2">
+
+                <!-- Date -->
+                <div class="col-md-1">
+                    <div class="date-wrapper">
+                        <input type="text" name="date" id="todayDate"
+                               class="form-control date-input"
+                               placeholder="Date" autocomplete="off" required>
+                    </div>
+                </div>
+
+                <!-- Supplier -->
+                <div class="col-md-2">
+                    <input type="text" name="supplier"
+                           placeholder="Supplier"
+                           class="form-control" required>
+                </div>
+
+                <!-- Medicine -->
+                <div class="col-md-2">
+                    <input type="text" name="medicine_name"
+                           placeholder="Medicine"
+                           class="form-control" required>
+                </div>
+
+                <!-- Batch -->
+                <div class="col-md-1">
+                    <input type="text" name="batch_no"
+                           placeholder="Batch"
+                           class="form-control" required>
+                </div>
+
+                <!-- Expiry -->
+                <div class="col-md-2">
+                    <div class="date-wrapper">
+                        <input type="text" name="expiry_date"
+                               class="form-control date-input"
+                               placeholder="Expiry"
+                               autocomplete="off" required>
+                    </div>
+                </div>
+
+                <!-- Qty -->
+                <div class="col-md-1">
+                    <input type="number" name="quantity"
+                           placeholder="Qty"
+                           class="form-control" required>
+                </div>
+
+                <!-- MRP -->
+                <div class="col-md-1">
+                    <input type="number" name="mrp"
+                           placeholder="MRP"
+                           class="form-control" required>
+                </div>
+
+                <!-- PTR -->
+                <div class="col-md-1">
+                    <input type="number" name="purchase_rate"
+                           placeholder="PTR"
+                           class="form-control">
+                </div>
+
+                <!-- GST -->
+                <div class="col-md-1">
+                    <input type="number" name="gst_percent"
+                           placeholder="GST"
+                           class="form-control">
+                </div>
+
+                <!-- Button -->
+                <div class="col-md-1">
+                    <button class="btn btn-success w-100">Add</button>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-hover" id="stockTable">
+        <thead>
+            <tr>
+                <th>Medicine</th>
+                <th>Batch</th>
+                <th>MRP</th>
+                <th>PTR</th>
+                <th>Expiry</th>
+                <th>Qty</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for item in stock %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>₹ {{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+
+            <td>
+                <strong>{{ item[5] }}</strong>
+            </td>
+
+            <td>
+                {% if item[6] == "Expired" %}
+                    <span class="badge bg-danger">Expired</span>
+                {% elif item[6] == "Low Stock" %}
+                    <span class="badge bg-warning text-dark">Low</span>
+                {% else %}
+                    <span class="badge bg-success">In Stock</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- SEARCH -->
+<script>
+document.getElementById("searchStock").addEventListener("keyup", function() {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#stockTable tbody tr");
+
+    rows.forEach(row => {
+        let medicine = row.children[0].innerText.toLowerCase();
+        row.style.display = medicine.includes(value) ? "" : "none";
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const today = new Date().toISOString().split("T")[0];
+    const input = document.getElementById("todayDate");
+    if (input) input.value = today;
+});
+</script>
+
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Inventory Status</h4>
+        <input type="text" id="searchStock" class="form-control w-25" placeholder="Search medicine...">
+    </div>
+
+    <!-- 🔥 QUICK ADD STOCK -->
+    <div class="card p-3 mb-4 bg-light">
+
+        <h6 class="mb-3">➕ Quick Add Stock</h6>
+
+        <form method="POST" action="/purchase">
+            <div class="row g-2">
+
+                <!-- Date -->
+                <div class="col-md-1">
+                    <div class="date-wrapper">
+                        <input type="text" name="date" id="todayDate"
+                               class="form-control date-input"
+                               placeholder="Date" autocomplete="off" required>
+                    </div>
+                </div>
+
+                <!-- Supplier -->
+                <div class="col-md-2">
+                    <input type="text" name="supplier"
+                           placeholder="Supplier"
+                           class="form-control" required>
+                </div>
+
+                <!-- Medicine -->
+                <div class="col-md-2">
+                    <input type="text" name="medicine_name"
+                           placeholder="Medicine"
+                           class="form-control" required>
+                </div>
+
+                <!-- Batch -->
+                <div class="col-md-1">
+                    <input type="text" name="batch_no"
+                           placeholder="Batch"
+                           class="form-control" required>
+                </div>
+
+                <!-- Expiry -->
+                <div class="col-md-2">
+                    <div class="date-wrapper">
+                        <input type="text" name="expiry_date"
+                               class="form-control date-input"
+                               placeholder="Expiry"
+                               autocomplete="off" required>
+                    </div>
+                </div>
+
+                <!-- Qty -->
+                <div class="col-md-1">
+                    <input type="number" name="quantity"
+                           placeholder="Qty"
+                           class="form-control" required>
+                </div>
+
+                <!-- MRP -->
+                <div class="col-md-1">
+                    <input type="number" name="mrp"
+                           placeholder="MRP"
+                           class="form-control" required>
+                </div>
+
+                <!-- PTR -->
+                <div class="col-md-1">
+                    <input type="number" name="purchase_rate"
+                           placeholder="PTR"
+                           class="form-control">
+                </div>
+
+                <!-- GST -->
+                <div class="col-md-1">
+                    <input type="number" name="gst_percent"
+                           placeholder="GST"
+                           class="form-control">
+                </div>
+
+                <!-- Button -->
+                <div class="col-md-1">
+                    <button class="btn btn-success w-100">Add</button>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+
+    <!-- TABLE -->
+    <table class="table table-hover" id="stockTable">
+        <thead>
+            <tr>
+                <th>Medicine</th>
+                <th>Batch</th>
+                <th>MRP</th>
+                <th>PTR</th>
+                <th>Expiry</th>
+                <th>Qty</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for item in stock %}
+        <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>₹ {{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+            <td>{{ item[4] }}</td>
+
+            <td>
+                <strong>{{ item[5] }}</strong>
+            </td>
+
+            <td>
+                {% if item[6] == "Expired" %}
+                    <span class="badge bg-danger">Expired</span>
+                {% elif item[6] == "Low Stock" %}
+                    <span class="badge bg-warning text-dark">Low</span>
+                {% else %}
+                    <span class="badge bg-success">In Stock</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- SEARCH -->
+<script>
+document.getElementById("searchStock").addEventListener("keyup", function() {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#stockTable tbody tr");
+
+    rows.forEach(row => {
+        let medicine = row.children[0].innerText.toLowerCase();
+        row.style.display = medicine.includes(value) ? "" : "none";
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const today = new Date().toISOString().split("T")[0];
+    const input = document.getElementById("todayDate");
+    if (input) input.value = today;
+});
+</script>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
+{% endblock %}

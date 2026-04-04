@@ -1,0 +1,60 @@
+<<<<<<< HEAD
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4" style="max-width: 400px; margin:auto;">
+    <h4 class="text-center mb-3">🔍 Recover Username</h4>
+
+    <form method="POST">
+        <input 
+            type="text" 
+            name="user_id" 
+            class="form-control mb-3" 
+            placeholder="Enter User ID or Username" 
+            required>
+
+        <button class="btn btn-primary w-100">Find Username</button>
+    </form>
+
+    {% if username %}
+        <!-- ✅ FIXED VISIBILITY (ADDED CLASS ONLY, NOTHING REMOVED) -->
+        <div class="mt-3 text-center p-3 rounded success-box"
+             style="background:#d1e7dd; color:#0f5132; font-weight:600;">
+            Your Username: <strong>{{ username }}</strong>
+        </div>
+    {% endif %}
+
+</div>
+
+=======
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4" style="max-width: 400px; margin:auto;">
+    <h4 class="text-center mb-3">🔍 Recover Username</h4>
+
+    <form method="POST">
+        <input 
+            type="text" 
+            name="user_id" 
+            class="form-control mb-3" 
+            placeholder="Enter User ID or Username" 
+            required>
+
+        <button class="btn btn-primary w-100">Find Username</button>
+    </form>
+
+    {% if username %}
+        <!-- ✅ FIXED VISIBILITY (ADDED CLASS ONLY, NOTHING REMOVED) -->
+        <div class="mt-3 text-center p-3 rounded success-box"
+             style="background:#d1e7dd; color:#0f5132; font-weight:600;">
+            Your Username: <strong>{{ username }}</strong>
+        </div>
+    {% endif %}
+
+</div>
+
+>>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
+{% endblock %}
