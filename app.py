@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from dotenv import load_dotenv
 load_dotenv()
 from flask import Flask, render_template, request, session, jsonify, redirect
@@ -1592,5 +1591,4 @@ def check_db():
 # RUN
 if __name__ == "__main__":
     init_db()
->>>>>>> e5c7eeebacc6eea58ad1f009c0d889c5321d417d
     app.run(debug=False)
