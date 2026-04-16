@@ -318,6 +318,7 @@ function setCurrentDateTime() {
     }
 
 window.onload = function() {
+    console.log("App started");
     setCurrentDateTime();
     loadEntries();
     loadTotalDashboard();
@@ -377,6 +378,16 @@ window.onload = function() {
     
     startAutoRefresh();
     addRippleEffect();
+
+    // 🔥 FAIL-SAFE: always show app
+    setTimeout(() => {
+        const app = document.getElementById("appRoot");
+        if (app && app.classList.contains("app-hidden")) {
+            app.classList.remove("app-hidden");
+            app.classList.add("app-visible");
+            console.log("Fallback UI activated");
+        }
+    }, 3000);
 };   
 
 function downloadExcel() {
@@ -443,13 +454,11 @@ function toggleMenu() {
     sidebar.classList.toggle("active");
 }
 
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/static/service-worker.js")
-        .then(() => console.log("Service Worker Registered"))
-        .catch(err => console.log("SW Error:", err));
-    });
-}
+// if ("serviceWorker" in navigator) {
+//     window.addEventListener("load", () => {
+//         navigator.serviceWorker.register("/static/service-worker.js")
+//     });
+// }
 
 let deferredPrompt;
 
