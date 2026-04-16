@@ -1,4 +1,4 @@
-const API = "https://mmlifecaremedicalledger.onrender.com";
+const API = "";
 
 function addEntry() {
     const name = document.getElementById("name").value.trim();
@@ -83,8 +83,11 @@ function loadEntries() {
     fetch(`${API}/get_entries`)
     .then(res => res.json())
     .then(data => {
+
         const tbody = document.querySelector("#ledgerTable tbody");
-        if (!Array.isArray(data) || !data.length) {
+            if (!tbody) return;
+        
+        if (!Array.isArray(data) || data.length === 0) {    
             tbody.innerHTML = "<tr><td colspan='10'>No data</td></tr>";
             return;
         }
@@ -373,8 +376,8 @@ window.onload = function() {
     }, 1800);
     
     startAutoRefresh();
+    addRippleEffect();
 };   
-addRippleEffect();
 
 function downloadExcel() {
     window.location.href = "/export_excel";
@@ -538,6 +541,7 @@ window.addEventListener("load", () => {
 
 function addRippleEffect() {
     const buttons = document.querySelectorAll("button");
+    if (!buttons || buttons.length === 0) return;
 
     buttons.forEach(button => {
         button.classList.add("ripple");
