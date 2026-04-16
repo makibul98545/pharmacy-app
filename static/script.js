@@ -328,6 +328,7 @@ window.onload = function() {
     loadSummary();
     
     updateActiveNav("topSection");
+    navigateTo("topSection");
 
     const splash = document.getElementById("splashScreen");
     const logo = document.getElementById("splashLogo");
