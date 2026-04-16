@@ -942,35 +942,6 @@ body.dark .row-zero td {
     }
 }
 
-    const screens = document.querySelectorAll(".screen");
-
-    screens.forEach(screen => {
-        screen.classList.remove("active");
-        screen.classList.add("exit");
-    });
-
-    setTimeout(() => {
-
-        screens.forEach(screen => {
-            screen.classList.remove("exit");
-        });
-
-        const target = document.getElementById(sectionId);
-        if (target) {
-            target.classList.add("active");
-        }
-
-        /* Smart loading */
-        if (sectionId === "tableSection") {
-            loadEntries();
-        }
-
-        if (sectionId === "summarySection") {
-            loadSummary();
-        }
-
-    }, 200);
-
 /* RIPPLE EFFECT */
 .ripple {
     position: relative;
@@ -1123,4 +1094,16 @@ body.dark .row-zero td {
 
 .success-popup {
     transition: opacity 0.3s ease;
+}
+
+#appRoot {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.app-hidden {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
