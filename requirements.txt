@@ -4,3 +4,4 @@ flask-sqlalchemy
 gunicorn
 openpyxl
 psycopg2-binary
+requests==2.31.0
