@@ -1,9 +1,12 @@
+const API = "https://mmlifecaremedicalledger.onrender.com";
+
 function addEntry() {
     const name = document.getElementById("name").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const purchaseInput = document.getElementById("purchase").value;
     const paymentInput = document.getElementById("payment").value;
     const date = document.getElementById("date").value;
+    
 
     if (!name) {
         alert("Enter customer name");
@@ -29,7 +32,7 @@ function addEntry() {
         return;
     }
 
-    fetch('/add_entry', {
+    fetch(`${API}/add_entry`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -77,7 +80,7 @@ function addEntry() {
 }
 
 function loadEntries() {
-    fetch('/get_entries')
+    fetch(`${API}/get_entries`)
     .then(res => res.json())
     .then(data => {
         const tbody = document.querySelector("#ledgerTable tbody");
@@ -139,7 +142,7 @@ function editEntry(entry) {
     const newPayment = prompt("Edit Payment", entry.payment);
     if (newPayment === null) return;
 
-    fetch(`/update_entry/${entry.id}`, {
+    fetch(`${API}/update_entry/${entry.id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -165,7 +168,7 @@ function editEntry(entry) {
 function deleteEntry(id) {
     if (!confirm("Are you sure to delete?")) return;
 
-    fetch(`/delete_entry/${id}`, {
+    fetch(`${API}/delete_entry/${id}`, {
         method: "DELETE"
     })
     .then(res => res.json())
@@ -219,7 +222,7 @@ function loadSummary() {
         filter = "today";
     }
 
-    let url = `/summary?filter=${filter}`;
+    let url = `${API}/summary?filter=${filter}`;
 
     if (filter === "custom") {
 
@@ -389,7 +392,7 @@ function searchCustomer() {
         return;
     }
 
-    fetch(`/get_entries_by_name?name=${name}`)
+    fetch(`${API}/get_entries_by_name?name=${name}`)
     .then(res => res.json())
     .then(data => {
         const tbody = document.querySelector("#ledgerTable tbody");
@@ -623,7 +626,7 @@ if (filterEl) {
 }
 
 function loadTotalDashboard() {
-    fetch('/total_summary')
+    fetch(`${API}/total_summary`)
     .then(res => res.json())
     .then(data => {
 
@@ -654,7 +657,7 @@ function loadTotalDashboard() {
 }
 
 function loadBackupList() {
-    fetch('/list_backups')
+    fetch(`${API}/list_backups`)
     .then(res => res.json())
     .then(files => {
 
@@ -682,7 +685,7 @@ function loadBackupList() {
 function restoreBackup(filename) {
     if (!confirm("Restore this backup? Current data will be replaced!")) return;
 
-    fetch('/restore_backup', {
+    fetch(`${API}/restore_backup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename })
@@ -711,7 +714,7 @@ function addExpense() {
         return;
     }
 
-    fetch('/add_expense', {
+    fetch(`${API}/add_expense`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, amount, date })
@@ -731,7 +734,7 @@ function addExpense() {
 }
 
 function loadExpenses() {
-    fetch('/get_expenses')
+    fetch(`${API}/get_expenses`)
     .then(res => res.json())
     .then(data => {
         const tbody = document.getElementById("expenseTable");
@@ -759,7 +762,10 @@ function loadExpenses() {
 function deleteExpense(id) {
     if (!confirm("Delete expense?")) return;
 
-    fetch(`/delete_expense/${id}`, { method: 'DELETE' })
+    fetch(`${API}/delete_expense/${id}`, {
+        method: 'DELETE'
+    })
+
     .then(() => {
         loadExpenses();
 
@@ -816,7 +822,7 @@ function uploadToDrive() {
 
     if (!confirm("Upload latest backup to Google Drive?")) return;
 
-    fetch('/upload_to_drive')
+    fetch(`${API}/upload_to_drive`)
     .then(res => res.json())
     .then(data => {
 
@@ -855,7 +861,7 @@ function sendWhatsApp(name, balance, phone) {
 }
 
 function sendBulkReminder() {
-    fetch('/get_customers_summary')
+    fetch(`${API}/get_customers_summary`)
     .then(res => res.json())
     .then(data => {
 
@@ -878,7 +884,7 @@ function sendBulkReminder() {
 }
 
 function loadCustomerSummary() {
-    fetch('/get_customers_summary')
+    fetch(`${API}/get_customers_summary`)
     .then(res => res.json())
     .then(data => {
         let table = document.getElementById("customerTableBody"); // ✅ FIX
@@ -908,7 +914,7 @@ function viewCustomer(name) {
 
     navigateTo('tableSection');  // keep this
 
-    fetch('/get_entries')
+    fetch(`${API}/get_entries`)
     .then(res => res.json())
     .then(data => {
 
@@ -977,7 +983,7 @@ function sendSMS(name, balance, phone) {
 
     const message = `This is regarding my outstanding balance of ₹${balance}. I will be clearing part of my outstanding shortly and Remaining will be settled soon. Thank you. - MM LifeCare Medical`;
 
-    fetch('/send_sms', {
+    fetch(`${API}/send_sms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, message })
@@ -999,7 +1005,7 @@ function sendSMS(name, balance, phone) {
 }
 
 function sendBulkSMS() {
-    fetch('/get_customers_summary')
+    fetch(`${API}/get_customers_summary`)
     .then(res => res.json())
     .then(data => {
 
@@ -1008,7 +1014,7 @@ function sendBulkSMS() {
         due.forEach(c => {
             const message = `This is regarding my outstanding balance of ₹${c.balance}. I will clear it soon. - MM LifeCare Medical`;
 
-            fetch('/send_sms', {
+            fetch(`${API}/send_sms`), {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ phone: c.phone, message })

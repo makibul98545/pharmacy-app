@@ -7,7 +7,6 @@ from models import db, Ledger, Expense
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import threading
-import webview
 import os
 import sys
 
@@ -687,14 +686,18 @@ def run_flask():
     app.run(host="127.0.0.1", port=5000, debug=False)
 
 if __name__ == "__main__":
-    t = threading.Thread(target=run_flask)
-    t.daemon = True
-    t.start()
+    if os.environ.get("RENDER"):
+        app.run(host="0.0.0.0", port=5000)
+    else:
+        import webview
+        t = threading.Thread(target=run_flask)
+        t.daemon = True
+        t.start()
 
-    webview.create_window(
-        "MM LifeCare Medical Ledger",
-        "http://127.0.0.1:5000",
-        width=1200,
-        height=800
-    )
-    webview.start()
+        webview.create_window(
+            "MM LifeCare Medical Ledger",
+            "http://127.0.0.1:5000",
+            width=1200,
+            height=800
+        )
+        webview.start()

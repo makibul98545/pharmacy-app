@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+instance/
+database/
+backups/
+token.pickle
+credentials.json
+.env
+build/
+dist/
+output/
