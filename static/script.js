@@ -410,7 +410,7 @@ function searchCustomer() {
     fetch(`${API}/get_entries_by_name?name=${name}`)
     .then(res => res.json())
     .then(data => {
-        const tbody = document.querySelector("#ledgerTable tbody");
+        const tbody = document.getElementById("ledgerTableBody");
         tbody.innerHTML = "";
 
         data.forEach(e => {
