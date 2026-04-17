@@ -391,6 +391,7 @@ window.onload = function() {
 
     document.getElementById("tableSection").classList.add("active");
 
+    loadEntries();
     startAutoRefresh();
     addRippleEffect();
     
