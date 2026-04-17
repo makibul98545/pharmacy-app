@@ -439,16 +439,18 @@ function searchCustomer() {
     });
 }
 
-const searchInput = document.getElementById("searchName");
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchName");
 
-if (searchInput) {
-    searchInput.addEventListener("input", function() {
-        if (this.value.trim() === "") {
-            loadEntries();
-            loadSummary();
-        }
-    });
-}
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            if (this.value.trim() === "") {
+                loadEntries();
+                loadSummary();
+            }
+        });
+    }
+});
 
 function toggleMenu() {
     const sidebar = document.getElementById("sidebar");
