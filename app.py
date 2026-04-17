@@ -322,7 +322,7 @@ def download_backup():
         )
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500   
+        return jsonify({"error": str(e)}), 500       
     
 def ensure_columns():
     try:
@@ -333,21 +333,22 @@ def ensure_columns():
                 SELECT column_name 
                 FROM information_schema.columns 
                 WHERE table_name='ledger'
+                AND table_schema='public'                       
             """))
 
             columns = [row[0] for row in result]
 
             if "phone" not in columns:
                 conn.execute(text("ALTER TABLE ledger ADD COLUMN phone VARCHAR"))
+                conn.commit()
                 print("✅ Added missing column: phone")
 
     except Exception as e:
-        print("Column check error:", e)        
-
+        print("Column check error:", e)            
+        
 with app.app_context():
     db.create_all()
-    ensure_columns()
-    create_daily_backup()     
+    ensure_columns()                
 
 from datetime import datetime, timedelta
 from models import db, Ledger, Expense
