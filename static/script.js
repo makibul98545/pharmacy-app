@@ -1,4 +1,4 @@
-const API = "";
+const API = window.location.origin;
 
 function addEntry() {
     const name = document.getElementById("name").value.trim();

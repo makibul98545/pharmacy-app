@@ -10,10 +10,7 @@ import threading
 import os
 import sys
 
-if getattr(sys, 'frozen', False):
-    BASE_DIR = sys._MEIPASS
-else:
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(
     __name__,
@@ -687,7 +684,8 @@ def run_flask():
 
 if __name__ == "__main__":
     if os.environ.get("RENDER"):
-        app.run(host="0.0.0.0", port=5000)
+        port = int(os.environ.get("PORT", 5000))
+        app.run(host="0.0.0.0", port=port)
     else:
         import webview
         t = threading.Thread(target=run_flask)
