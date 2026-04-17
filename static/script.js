@@ -376,10 +376,6 @@ window.onload = function() {
         }, 1000);
 
     }, 1800);
-    
-    
-    startAutoRefresh();
-    addRippleEffect();
 
     // 🔥 FAIL-SAFE: always show app
     setTimeout(() => {
@@ -395,6 +391,9 @@ window.onload = function() {
     screens.forEach(s => s.classList.remove("active"));
 
     document.getElementById("tableSection").classList.add("active");
+
+    startAutoRefresh();
+    addRippleEffect();
     
 };   
 
