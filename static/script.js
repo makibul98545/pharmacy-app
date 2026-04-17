@@ -505,7 +505,7 @@ function toggleTheme() {
     }
 }
 
-function navigateTo(sectionId) {
+window.navigateTo = function(sectionId) {
 
     const screens = document.querySelectorAll(".screen");
 
