@@ -323,7 +323,6 @@ window.onload = function() {
     document.getElementById("appRoot").classList.remove("app-hidden");
 
     setCurrentDateTime();
-    loadEntries();
     loadTotalDashboard();
     const filterEl = document.getElementById("filterType");
     if (filterEl) filterEl.value = "week";
