@@ -323,9 +323,30 @@ def download_backup():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500   
+    
+def ensure_columns():
+    try:
+        from sqlalchemy import text
+
+        with db.engine.connect() as conn:
+            result = conn.execute(text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name='ledger'
+            """))
+
+            columns = [row[0] for row in result]
+
+            if "phone" not in columns:
+                conn.execute(text("ALTER TABLE ledger ADD COLUMN phone VARCHAR"))
+                print("✅ Added missing column: phone")
+
+    except Exception as e:
+        print("Column check error:", e)        
 
 with app.app_context():
     db.create_all()
+    ensure_columns()
     create_daily_backup()     
 
 from datetime import datetime, timedelta
