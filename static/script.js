@@ -84,7 +84,7 @@ function loadEntries() {
     .then(res => res.json())
     .then(data => {
 
-        const tbody = document.querySelector("#ledgerTable tbody");
+        const tbody = document.getElementById("ledgerTableBody");
             if (!tbody) return;
         
         if (!Array.isArray(data) || data.length === 0) {    
