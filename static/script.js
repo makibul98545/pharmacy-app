@@ -329,10 +329,6 @@ window.onload = function() {
     if (filterEl) filterEl.value = "week";
 
     loadSummary();
-    
-    setTimeout(() => {
-        navigateTo("tableSection");
-    }, 50);
 
     const splash = document.getElementById("splashScreen");
     const logo = document.getElementById("splashLogo");
@@ -381,6 +377,7 @@ window.onload = function() {
 
     }, 1800);
     
+    
     startAutoRefresh();
     addRippleEffect();
 
@@ -393,6 +390,12 @@ window.onload = function() {
             console.log("Fallback UI activated");
         }
     }, 3000);
+
+    const screens = document.querySelectorAll(".screen");
+    screens.forEach(s => s.classList.remove("active"));
+
+    document.getElementById("tableSection").classList.add("active");
+    
 };   
 
 function downloadExcel() {
