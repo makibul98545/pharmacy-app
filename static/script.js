@@ -386,12 +386,10 @@ window.onload = function() {
         }
     }, 3000);
 
-    const screens = document.querySelectorAll(".screen");
-    screens.forEach(s => s.classList.remove("active"));
+    setTimeout(() => {
+        navigateTo('tableSection');
+    }, 500);
 
-    document.getElementById("tableSection").classList.add("active");
-
-    loadEntries();
     startAutoRefresh();
     addRippleEffect();
     
