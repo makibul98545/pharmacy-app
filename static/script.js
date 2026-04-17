@@ -319,6 +319,9 @@ function setCurrentDateTime() {
 
 window.onload = function() {
     console.log("App started");
+
+    document.getElementById("appRoot").classList.remove("app-hidden");
+
     setCurrentDateTime();
     loadEntries();
     loadTotalDashboard();
@@ -327,8 +330,9 @@ window.onload = function() {
 
     loadSummary();
     
-    updateActiveNav("topSection");
-    navigateTo("tableSection");
+    setTimeout(() => {
+        navigateTo("tableSection");
+    }, 50);
 
     const splash = document.getElementById("splashScreen");
     const logo = document.getElementById("splashLogo");

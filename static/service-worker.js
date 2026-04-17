@@ -1,4 +1,4 @@
-const CACHE_NAME = "mm-lifecare-v1";
+const CACHE_NAME = "mm-lifecare-v2";
 
 const urlsToCache = [
     "/",
