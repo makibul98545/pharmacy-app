@@ -3,8 +3,9 @@
   "short_name": "MM Ledger",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/static/icon-192.png",

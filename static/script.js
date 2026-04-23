@@ -331,3 +331,8 @@ function toggleTheme() {
         btn.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
     }
 }
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/sw.js")
+        .then(() => console.log("Service Worker Registered"));
+}
