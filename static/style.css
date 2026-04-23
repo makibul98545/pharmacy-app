@@ -80,7 +80,11 @@ body {
 }
 
 .screen.active {
-    display: block;
+    display: block !important;
+}
+
+.screen {
+    width: 100%;
 }
 
 @keyframes fadeIn {
@@ -277,4 +281,9 @@ button {
     .cards {
         flex-direction: column;
     }
+}
+
+/* --- FIX: ensure at least one screen visible --- */
+#topSection {
+    display: block;
 }
