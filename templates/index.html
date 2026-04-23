@@ -3,217 +3,169 @@
 <head>
     <title>MM LifeCare Medical Ledger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1e293b">
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="manifest" href="/static/manifest.json">
-    <link rel="icon" href="/static/icon.png">
 </head>
 <body>
 
-<audio id="startupSound" src="/static/start.mp3" preload="auto"></audio>    
-
-<div id="splashScreen">
-    <div class="splash-bg"></div>
-
-    <div class="splash-card" id="splashCard">
-        <img src="/static/icon-512.png" class="logo-animate" id="splashLogo">
-
-        <h1 class="brand-text">MM LifeCare</h1>
-        <p class="tagline">Smart Medical Ledger</p>
-
-        <div class="loading-bar">
-            <div class="loading-progress"></div>
-        </div>
-    </div>
-</div>
-
-<div id="result" style="margin-top:10px;"></div>
-
-<!-- Hamburger Button (Mobile Only) -->
-<div class="hamburger" onclick="toggleMenu()">☰</div>    
-
-<div class="app-layout app-hidden" id="appRoot">
+<div class="app">
 
     <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-
-        <div style="text-align:center; margin-bottom:15px;">
-            <img src="/static/icon.png" width="40" style="border-radius:8px;">
-            <h2 style="margin-top:5px;">MM LifeCare</h2>
-        </div>
+    <div class="sidebar">
+        <h2>MM LifeCare Medical Ledger</h2>
 
         <button onclick="navigateTo('topSection')">🏠 Dashboard</button>
         <button onclick="navigateTo('formSection')">➕ Add Entry</button>
         <button onclick="navigateTo('tableSection')">📋 Ledger</button>
         <button onclick="navigateTo('summarySection')">📊 Summary</button>
         <button onclick="navigateTo('expenseSection')">💸 Expense</button>
-        <button onclick="navigateTo('customerSection'); loadCustomerSummary()">
-            Customers
-        </button>
-
-        <button onclick="downloadExcel()">⬇ Export</button>
-        <button onclick="downloadBackup()">💾 Backup</button>
-        <button onclick="uploadToDrive()">☁ Backup to Drive</button>
-        <button onclick="navigateTo('restoreSection')">♻ Restore</button>
-        <button onclick="sendBulkReminder()" style="background:#25D366; margin-bottom:10px;">
-            Send All Due Reminders
-        </button>
-
-        <button id="themeToggle" onclick="toggleTheme()">🌙 Dark</button>
+        <button onclick="navigateTo('reminderSection')">📩 Reminders</button>
+        <button id="themeBtn">🌙 Dark Mode</button>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+    <!-- Main -->
+    <div class="main">
 
-    <!-- DASHBOARD -->
-    <div class="container screen active" id="topSection">
-        <h2>MM LifeCare Medical Ledger</h2>
-
-        <div class="dashboard-cards">
-            <div class="card purchase">
-                <h4>Total Purchase</h4>
-                <p id="cardPurchase">0</p>
-            </div>
-
-            <div class="card payment">
-                <h4>Total Payment</h4>
-                <p id="cardPayment">0</p>
-            </div>
-
-            <div class="card net" id="netCard">
-                <h4>Net Balance</h4>
-                <p id="cardNet">0</p>
-                <span id="netStatus"></span>
+        <!-- DASHBOARD -->
+        <div id="topSection" class="screen active">
+            <h2>Dashboard</h2>
+            <div class="cards">
+                <div class="card blue">
+                    <h4>Total Purchase</h4>
+                    <p id="cardPurchase">0</p>
+                </div>
+                <div class="card green">
+                    <h4>Total Payment</h4>
+                    <p id="cardPayment">0</p>
+                </div>
+                <div class="card yellow">
+                    <h4>Net Balance</h4>
+                    <p id="cardNet">0</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- FORM -->
-    <div class="container screen" id="formSection">
-        <input type="datetime-local" id="date">
-        <input type="text" id="name" placeholder="Customer Name">
-        <input type="text" id="phone" placeholder="Customer Phone">
-        <input type="number" id="purchase" placeholder="Current Purchase" step="0.01">
-        <input type="number" id="payment" placeholder="Payment" step="0.01">
-
-        <button onclick="addEntry()">Add Entry</button>
-    </div>
-
-    <!-- TABLE -->
-    <div class="container screen" id="tableSection">
-
-        <button onclick="navigateTo('customerSection'); loadCustomerSummary();" 
-                style="margin-bottom:10px;">
-            ← Back to Customers
-        </button>
-
-        <table id="ledgerTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Previous</th>
-                    <th>Purchase</th>
-                    <th>Total</th>
-                    <th>Payment</th>
-                    <th>Balance</th>
-                    <th>Action</th>
-                    <th>Reminder</th>
-                </tr>
-            </thead>
-           <tbody id="ledgerTableBody"></tbody>
-        </table>
-    </div>
-
-    <!-- SUMMARY -->
-    <div class="container screen" id="summarySection">
-        <h3>Ledger Summary</h3>
-        <div class="summary-controls">
-
-            <select id="filterType" onchange="loadSummary()">
-                <option value="today">Today</option>
-                <option value="week">Last 7 Days</option>
-                <option value="15days">Last 15 Days</option>
-                <option value="month">This Month</option>
-                <option value="3months">Last 3 Months</option>
-                <option value="year">Last Year</option>
-                <option value="custom">Custom</option>
+        <!-- FORM -->
+        <div id="formSection" class="screen">
+            <h2>Add Entry</h2>
+            <select id="entryType">
+                <option value="customer">Customer (Sale)</option>
+                <option value="distributor">Distributor (Purchase)</option>
             </select>
-
-            <div id="customRange" style="display:none;">
-                <input type="date" id="startDate">
-                <input type="date" id="endDate">
-                <button onclick="loadSummary()">Apply</button>
+            <div class="form-grid">
+                <input type="datetime-local" id="date">
+                <input id="name" placeholder="Customer Name">
+                <input id="phone" placeholder="Phone Number">
+                <input id="purchase" placeholder="Purchase">
+                <input id="payment" placeholder="Payment">
             </div>
-
+            <button class="primary" onclick="addEntry()">Add Entry</button>
         </div>
 
-        <div id="summaryBox" class="summary-cards"></div>
-    </div>
-</div>
+        <!-- LEDGER -->
+        <div id="tableSection" class="screen">
+            <h2>Ledger</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>                                                        
+                            <th>Previous</th>
+                            <th>Sale</th>
+                            <th>Payment</th>
+                            <th>Balance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody"></tbody>
+                </table>
+            </div>
+        </div>
 
-<div class="container screen" id="restoreSection">
-    <h3>Restore Backup</h3>
-    <div id="backupList"></div>
-</div>
+        <!-- SUMMARY -->
+        <div id="summarySection" class="screen">
+            <h2>Summary</h2>
+            <div id="summaryBox" class="summary-box"></div>
+        </div>
 
-<div class="container screen" id="customerSection">
-    <h3>Customers</h3>
+        <!-- EXPENSE -->
+        <div id="expenseSection" class="screen">
 
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Balance</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="customerTableBody"></tbody>
-    </table>
-</div>
+            <div style="margin:10px 0;">
+                <b>Custom Range:</b><br>
+                <input type="date" id="rangeStart">
+                <input type="date" id="rangeEnd">
+                <button onclick="loadExpenseRange()">Filter</button>
+            </div>
 
-<!-- Floating Add Button -->
-<button class="fab" onclick="navigateTo('formSection')">＋</button>
+            <div id="rangeResult" style="margin-top:10px;"></div>
 
-<!-- Bottom Navigation -->
-<div class="bottom-nav">
-    <button onclick="navigateTo('topSection')">🏠</button>
-    <button onclick="navigateTo('formSection')">➕</button>
-    <button onclick="navigateTo('tableSection')">📋</button>
-    <button onclick="navigateTo('summarySection')">📊</button>
-</div>
+            <div style="margin-bottom:10px;">
+                <select id="expenseFilter" onchange="loadExpenseSummary()">
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>    
 
-<div class="container screen" id="expenseSection">
-    <h3>Expense</h3>
+            <div id="expenseSummary" style="margin-top:10px;font-weight:bold;"></div>
 
-    <input type="datetime-local" id="expDate">
-    <input type="text" id="expTitle" placeholder="Expense Title">
-    <input type="number" id="expAmount" placeholder="Amount">
+            <h2>Expense</h2>
+            <div class="form-grid">
+                <input id="expTitle" placeholder="Expense Title">
 
-    <button onclick="addExpense()">Add Expense</button>
+                <select id="expensePeriod" onchange="loadExpenseBreakdown()">
+                    <option value="last_week">Last Week</option>
+                    <option value="last_month" selected>Last Month</option>
+                    <option value="last_year">Last Year</option>
+                </select>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Title</th>
-                <th>Amount</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="expenseTable"></tbody>
-    </table>
-</div>
+                <select id="expCategory">
+                    <option value="fuel">Fuel</option>
+                    <option value="rent">Rent</option>
+                    <option value="salary">Salary</option>
+                    <option value="other">Other</option>
+                </select>               
+                <input id="expAmount" placeholder="Amount">
+                <input type="datetime-local" id="expDate">
+            </div>
 
-<div id="successPopup" class="success-popup">
-    <div class="success-box">
-        ✔ Entry Added Successfully
+            <div id="expenseBreakdown" style="margin-top:10px;"></div>
+            <button class="primary" onclick="addExpense()">Add Expense</button>
+
+            <table>
+                <tbody id="expenseTable"></tbody>
+            </table>
+        </div>
+
+        <!-- REMINDERS -->
+        <div id="reminderSection" class="screen">
+            <h2>Reminders</h2>
+
+            <div class="cards">
+
+                <!-- Distributor -->
+                <div class="card blue">
+                    <h3>📦 Distributor Due</h3>
+                    <input id="distName" placeholder="Distributor Name">
+                    <input id="distPhone" placeholder="Phone Number">
+                    <input id="distAmount" placeholder="Amount">
+                    <button onclick="sendDistributorReminder()">Send Reminder</button>
+                </div>
+
+                <!-- Customer -->
+                <div class="card green">
+                    <h3>👤 Customer Due</h3>
+                    <p>Use ledger WhatsApp or send all:</p>
+                    <button onclick="sendBulkCustomerReminder()">Send Bulk</button>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script src="/static/script.js"></script>
-
 </body>
 </html>

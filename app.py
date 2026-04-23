@@ -15,7 +15,23 @@ os.makedirs(db_folder, exist_ok=True)
 # database path
 db_path = os.path.join(db_folder, "ledger.db")
 
+<<<<<<< HEAD
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+=======
+db_url = os.getenv("DATABASE_URL")
+
+if db_url:
+    # Render fix (important)
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    print("🚀 Using PostgreSQL")
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+    print("💻 Using SQLite (local)")
+    
+>>>>>>> ca7d4fb (connected PostgreSQL + UI fixes)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -328,4 +344,8 @@ def expenses_by_range():
 
 # ================= RUN =================
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(debug=True)
+=======
+    app.run(debug=True)
+>>>>>>> ca7d4fb (connected PostgreSQL + UI fixes)

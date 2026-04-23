@@ -69,6 +69,10 @@ body {
     padding: 25px;
 }
 
+.main h2 {
+    margin-top: 0;
+}
+
 /* -------- SCREEN -------- */
 .screen {
     display: none;
