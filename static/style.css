@@ -253,23 +253,6 @@ button {
 /* -------- RESPONSIVE -------- */
 @media (max-width: 768px) {
 
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-        gap: 8px;
-    }
-
-    .sidebar button {
-        flex: 1;
-        font-size: 12px;
-        padding: 8px;
-    }
-
     .main {
         padding: 15px;
     }
