@@ -2,8 +2,17 @@ const API = window.location.origin;
 
 // NAVIGATION
 function navigateTo(sectionId) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(sectionId).classList.add("active");
+    const screens = document.querySelectorAll(".screen");
+    screens.forEach(s => {
+        s.classList.remove("active");
+        s.style.display = "none";
+    });
+
+    const target = document.getElementById(sectionId);
+    if (!target) return;
+
+    target.classList.add("active");
+    target.style.display = "block";
 
     if (sectionId === "tableSection") loadEntries();
     if (sectionId === "topSection") {
@@ -55,8 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadSummary();
     });
 
-    updateDashboardLabels(entryType.value);
-    loadDashboard();
+    navigateTo("topSection");
 
     const btn = document.getElementById("themeBtn");
 
