@@ -338,6 +338,12 @@ def expenses_by_range():
         ]
     })
 
+from flask import send_from_directory
+
+@app.route('/.well-known/<path:filename>')
+def well_known(filename):
+    return send_from_directory('static/.well-known', filename)   
+
 # ================= RUN =================
 if __name__ == '__main__':
     app.run(debug=True)
