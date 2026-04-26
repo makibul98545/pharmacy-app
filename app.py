@@ -3,6 +3,22 @@ from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+def parse_datetime(date_str):
+    """Parse various datetime formats from frontend"""
+    if not date_str:
+        return datetime.now()
+    
+    try:
+        # Try ISO format first (2026-04-26T10:00)
+        return datetime.fromisoformat(date_str.replace('T', ' '))
+    except ValueError:
+        try:
+            # Try direct ISO format
+            return datetime.fromisoformat(date_str)
+        except ValueError:
+            # Fallback to now
+            return datetime.now()
+
 app = Flask(__name__)
 
 # ================= DATABASE CONFIG (FIXED) =================
@@ -95,7 +111,7 @@ def add_entry():
         entry_type=type_,
         customer_name=name,
         phone=data.get("phone"),
-        date=datetime.fromisoformat(data.get("date")) if data.get("date") else datetime.now(),
+        date=parse_datetime(data.get("date")) if data.get("date") else datetime.now(),
         current_purchase=purchase,
         payment=payment,
         balance=balance
@@ -356,4 +372,4 @@ def well_known(filename):
 
 # ================= RUN =================
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
