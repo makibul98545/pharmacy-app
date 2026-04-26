@@ -233,6 +233,48 @@ function deleteEntry(id) {
         .then(() => loadEntries());
 }
 
+function sendDistributorReminder() {
+    const name = document.getElementById("distName").value.trim();
+    const phone = document.getElementById("distPhone").value.trim();
+    const amount = document.getElementById("distAmount").value.trim();
+
+    if (!name || !phone || !amount) {
+        alert("Distributor name, phone and amount are required.");
+        return;
+    }
+
+    const clean = phone.replace(/\D/g, "");
+    if (!clean) {
+        alert("Enter a valid phone number.");
+        return;
+    }
+
+    const msg = `Dear ${name},\nYour distributor due is ₹${amount}. Please make the payment soon.`;
+    window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`);
+}
+
+async function sendBulkCustomerReminder() {
+    const type = "customer";
+    const response = await fetch(`${API}/get_entries?type=${type}`, { cache: 'no-cache' });
+    const data = await response.json();
+
+    const dueCustomers = data.filter(e => e.balance > 0 && e.phone);
+    if (!dueCustomers.length) {
+        alert("No customer dues found to send reminders.");
+        return;
+    }
+
+    const lines = dueCustomers.map(e => `${e.name}: ₹${e.balance} (${e.phone})`);
+    const message = `Customer due list:\n${lines.join("\n")}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(message);
+        alert("Customer due list copied to clipboard. Paste it into WhatsApp or your messaging app.");
+    } else {
+        prompt("Copy this customer due list and send it via WhatsApp:", message);
+    }
+}
+
 // WHATSAPP
 function sendWhatsApp(name, balance, phone) {
     if (!phone || balance <= 0) return;
