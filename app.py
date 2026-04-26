@@ -265,18 +265,30 @@ def import_data():
 
         db.session.commit()
 
-        # Recalculate balances for all customers
-        customers = db.session.query(Ledger.customer_name, Ledger.entry_type).distinct().all()
+        # Recalculate balances for all customers using raw SQL
+        # Get distinct customer_name and entry_type combinations
+        customer_query = text("SELECT DISTINCT customer_name, entry_type FROM ledger")
+        customers = db.session.execute(customer_query).fetchall()
+        
         for customer_name, entry_type in customers:
-            entries = Ledger.query.filter_by(
-                customer_name=customer_name,
-                entry_type=entry_type
-            ).order_by(Ledger.date.asc()).all()
+            # Get all entries for this customer/type ordered by date
+            entries_query = text("""
+                SELECT id, current_purchase, payment 
+                FROM ledger 
+                WHERE customer_name = :customer_name AND entry_type = :entry_type 
+                ORDER BY date ASC
+            """)
+            entries = db.session.execute(entries_query, {
+                'customer_name': customer_name, 
+                'entry_type': entry_type
+            }).fetchall()
 
             running_balance = 0
             for entry in entries:
-                running_balance += (entry.current_purchase or 0) - (entry.payment or 0)
-                entry.balance = running_balance
+                running_balance += (entry[1] or 0) - (entry[2] or 0)  # current_purchase - payment
+                # Update balance for this entry
+                update_query = text("UPDATE ledger SET balance = :balance WHERE id = :id")
+                db.session.execute(update_query, {'balance': running_balance, 'id': entry[0]})
 
         db.session.commit()
 
