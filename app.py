@@ -199,6 +199,55 @@ def delete_entry(id):
 
     return jsonify({"message": "Deleted"})
 
+# -------- IMPORT DATA (FOR MIGRATION) --------
+@app.route('/import_data', methods=['POST'])
+def import_data():
+    try:
+        data = request.json
+        if not data or 'entries' not in data:
+            return jsonify({"error": "No entries provided"}), 400
+
+        imported_count = 0
+        for entry_data in data['entries']:
+            # Create entry
+            entry = Ledger(
+                entry_type=entry_data.get('type', 'customer'),
+                customer_name=entry_data['customer_name'],
+                phone=entry_data.get('phone', ''),
+                date=parse_datetime(entry_data.get('date')),
+                current_purchase=float(entry_data.get('current_purchase', 0)),
+                payment=float(entry_data.get('payment', 0)),
+                balance=0  # Will be recalculated
+            )
+            db.session.add(entry)
+            imported_count += 1
+
+        db.session.commit()
+
+        # Recalculate balances for all customers
+        customers = db.session.query(Ledger.customer_name, Ledger.entry_type).distinct().all()
+        for customer_name, entry_type in customers:
+            entries = Ledger.query.filter_by(
+                customer_name=customer_name,
+                entry_type=entry_type
+            ).order_by(Ledger.date.asc()).all()
+
+            running_balance = 0
+            for entry in entries:
+                running_balance += (entry.current_purchase or 0) - (entry.payment or 0)
+                entry.balance = running_balance
+
+        db.session.commit()
+
+        return jsonify({
+            "message": f"Imported {imported_count} entries successfully",
+            "count": imported_count
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 # -------- DASHBOARD --------
 @app.route('/total_summary')
 def total_summary():

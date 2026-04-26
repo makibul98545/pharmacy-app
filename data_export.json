@@ -1,0 +1,66 @@
+[
+  {
+    "type": "distributor",
+    "customer_name": "M H DRUGS DISTRIBUTOR",
+    "phone": "9706998974",
+    "date": "2026-04-22 13:10:00.000000",
+    "current_purchase": 16963.0,
+    "payment": 15000.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "M H DRUGS DISTRIBUTOR",
+    "phone": "9706998974",
+    "date": "2026-04-26 04:22:00.000000",
+    "current_purchase": 0,
+    "payment": 15000.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "M H DRUGS DISTRIBUTOR",
+    "phone": "9706998974",
+    "date": "2026-04-26 04:34:00.000000",
+    "current_purchase": 0,
+    "payment": 15000.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "Test Customer",
+    "phone": "1234567890",
+    "date": "2026-04-26 10:00:00.000000",
+    "current_purchase": 100.0,
+    "payment": 50.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "Test Customer 2",
+    "phone": "1234567890",
+    "date": "2026-04-26 14:30:00.000000",
+    "current_purchase": 200.0,
+    "payment": 100.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "Test Customer 3",
+    "phone": "1234567890",
+    "date": "2026-04-26 10:47:15.270722",
+    "current_purchase": 100.0,
+    "payment": 50.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "Test Customer 4",
+    "phone": "1234567890",
+    "date": "2026-04-26 15:00:00.000000",
+    "current_purchase": 200.0,
+    "payment": 150.0
+  },
+  {
+    "type": "customer",
+    "customer_name": "Test Customer 4",
+    "phone": "1234567890",
+    "date": "2026-04-26 15:00:00.000000",
+    "current_purchase": 200.0,
+    "payment": 150.0
+  }
+]
