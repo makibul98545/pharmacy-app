@@ -613,6 +613,40 @@ def expenses_by_range():
         ]
     })
 
+@app.route('/export_data')
+def export_data():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/export_data')
+
+    # Export all ledger entries
+    ledger_entries = Ledger.query.order_by(Ledger.id.asc()).all()
+    expenses = Expense.query.order_by(Expense.id.asc()).all()
+
+    data = {
+        "ledger": [{
+            "id": e.id,
+            "entry_type": e.entry_type,
+            "customer_name": e.customer_name,
+            "phone": e.phone,
+            "date": e.date.strftime("%Y-%m-%d %H:%M:%S.%f"),
+            "current_purchase": e.current_purchase,
+            "payment": e.payment,
+            "balance": e.balance,
+            "previous_balance": e.previous_balance,
+            "total": e.total
+        } for e in ledger_entries],
+        "expenses": [{
+            "id": e.id,
+            "title": e.title,
+            "category": e.category,
+            "amount": e.amount,
+            "date": e.date.strftime("%Y-%m-%d %H:%M:%S.%f")
+        } for e in expenses],
+        "exported_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    return jsonify(data)
+
 @app.route('/export_html')
 def export_html():
     if REMOTE_API_URL:
