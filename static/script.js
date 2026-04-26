@@ -101,7 +101,9 @@ function updateDashboardLabels(type) {
 function loadDashboard() {
     const type = document.getElementById("entryType").value;
 
-    fetch(`${API}/total_summary?type=${type}`)
+    fetch(`${API}/total_summary?type=${type}`, {
+        cache: 'no-cache'
+    })
         .then(res => res.json())
         .then(data => {
             document.getElementById("cardPurchase").innerText = data.total_purchase || 0;
@@ -165,7 +167,9 @@ function addEntry() {
 function loadEntries() {
     const type = document.getElementById("entryType").value;
 
-    fetch(`${API}/get_entries?type=${type}`)
+    fetch(`${API}/get_entries?type=${type}`, {
+        cache: 'no-cache'
+    })
         .then(res => res.json())
         .then(data => {
             const body = document.getElementById("ledgerTableBody");
@@ -240,7 +244,9 @@ function addExpense() {
 }
 
 function loadExpenses() {
-    fetch(`${API}/get_expenses`)
+    fetch(`${API}/get_expenses`, {
+        cache: 'no-cache'
+    })
         .then(res => res.json())
         .then(data => {
             const table = document.getElementById("expenseTable");
@@ -256,7 +262,9 @@ function loadExpenseBreakdown() {
 
     const period = document.getElementById("expensePeriod").value;
 
-    fetch(`${API}/expense_breakdown?period=${period}`)
+    fetch(`${API}/expense_breakdown?period=${period}`, {
+        cache: 'no-cache'
+    })
     .then(res => res.json())
     .then(data => {
 
@@ -274,7 +282,9 @@ function loadExpenseSummary() {
 
     const period = document.getElementById("expenseFilter").value;
 
-    fetch(`${API}/expense_summary?period=${period}`)
+    fetch(`${API}/expense_summary?period=${period}`, {
+        cache: 'no-cache'
+    })
     .then(res => res.json())
     .then(data => {
 
@@ -287,7 +297,9 @@ function loadSummary() {
 
     const type = document.getElementById("entryType").value;
 
-    fetch(`${API}/summary?type=${type}`)
+    fetch(`${API}/summary?type=${type}`, {
+        cache: 'no-cache'
+    })
     .then(res => res.json())
     .then(data => {
 
@@ -310,7 +322,9 @@ function loadExpenseRange() {
         return;
     }
 
-    fetch(`${API}/expenses_by_range?start=${start}&end=${end}`)
+    fetch(`${API}/expenses_by_range?start=${start}&end=${end}`, {
+        cache: 'no-cache'
+    })
     .then(res => res.json())
     .then(data => {
 

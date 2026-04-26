@@ -55,6 +55,16 @@ with app.app_context():
     db.create_all()
     print("✅ Database created at:", db_path)
 
+# ================= CACHE CONTROL =================
+@app.after_request
+def add_cache_control(response):
+    # Prevent caching for API responses
+    if request.path.startswith('/get_') or request.path.startswith('/total_') or request.path.startswith('/add_') or request.path.startswith('/update_') or request.path.startswith('/delete_'):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 # ================= ROUTES =================
 
 @app.route('/')
