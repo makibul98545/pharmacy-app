@@ -199,6 +199,28 @@ def delete_entry(id):
 
     return jsonify({"message": "Deleted"})
 
+# -------- DATABASE MIGRATION --------
+@app.route('/migrate_db', methods=['POST'])
+def migrate_db():
+    """Add missing columns to database"""
+    try:
+        from sqlalchemy import text
+
+        # Check if entry_type column exists
+        result = db.session.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='ledger' AND column_name='entry_type'"))
+
+        if not result.fetchone():
+            # Add entry_type column with default value
+            db.session.execute(text("ALTER TABLE ledger ADD COLUMN entry_type VARCHAR(20) DEFAULT 'customer'"))
+            db.session.commit()
+            return jsonify({"message": "entry_type column added successfully"})
+        else:
+            return jsonify({"message": "entry_type column already exists"})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 # -------- IMPORT DATA (FOR MIGRATION) --------
 @app.route('/import_data', methods=['POST'])
 def import_data():

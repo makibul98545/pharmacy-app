@@ -13,6 +13,28 @@ def migrate_data(production_url="https://pharmacy-ledger.onrender.com"):
     Migrate data from data_export.json to production
     """
 
+    print("🔧 Step 1: Running database migration...")
+
+    # First, run database migration to add missing columns
+    try:
+        response = requests.post(
+            f"{production_url}/migrate_db",
+            headers={"Content-Type": "application/json"},
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Database migration: {result.get('message', 'Migration completed')}")
+        else:
+            print(f"❌ Database migration failed: HTTP {response.status_code}")
+            print(f"Response: {response.text}")
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Database migration network error: {e}")
+        return False
+
     # Load exported data
     try:
         with open('data_export.json', 'r') as f:
@@ -28,7 +50,7 @@ def migrate_data(production_url="https://pharmacy-ledger.onrender.com"):
         print("⚠️  No entries to import")
         return True
 
-    print(f"📤 Importing {len(entries)} entries to production...")
+    print(f"📤 Step 2: Importing {len(entries)} entries to production...")
 
     # Send to production
     payload = {"entries": entries}

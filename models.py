@@ -4,6 +4,7 @@ db = SQLAlchemy()
 
 class Ledger(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    entry_type = db.Column(db.String(20), default="customer")
     customer_name = db.Column(db.String(100))
     phone = db.Column(db.String(20))
     date = db.Column(db.DateTime)
