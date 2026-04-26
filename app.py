@@ -453,19 +453,36 @@ def add_expense():
     if REMOTE_API_URL:
         return proxy_request('POST', '/add_expense', json=request.get_json())
 
-    data = request.json
+    try:
+        data = request.json
+        
+        # Validate required fields
+        if not data or not data.get('title') or not data.get('amount'):
+            return jsonify({"error": "Title and amount are required"}), 400
+        
+        # Validate amount is a number
+        try:
+            amount = float(data['amount'])
+            if amount <= 0:
+                return jsonify({"error": "Amount must be greater than 0"}), 400
+        except ValueError:
+            return jsonify({"error": "Invalid amount format"}), 400
 
-    exp = Expense(
-        title=data['title'],
-        category=data.get('category', 'other'),
-        amount=float(data['amount']),
-        date=datetime.fromisoformat(data.get("date")) if data.get("date") else datetime.now()
-    )
+        exp = Expense(
+            title=data['title'].strip(),
+            category=data.get('category', 'other'),
+            amount=amount,
+            date=datetime.fromisoformat(data.get("date")) if data.get("date") else datetime.now()
+        )
 
-    db.session.add(exp)
-    db.session.commit()
+        db.session.add(exp)
+        db.session.commit()
 
-    return jsonify({"message": "Added"})
+        return jsonify({"message": "Expense added successfully"})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/get_expenses')
 def get_expenses():

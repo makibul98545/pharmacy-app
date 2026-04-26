@@ -287,16 +287,47 @@ function sendWhatsApp(name, balance, phone) {
 
 // EXPENSE
 function addExpense() {
+    const title = document.getElementById("expTitle").value.trim();
+    const amount = document.getElementById("expAmount").value.trim();
+    
+    // Basic client-side validation
+    if (!title) {
+        alert("Please enter an expense title");
+        return;
+    }
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        alert("Please enter a valid amount greater than 0");
+        return;
+    }
+
     fetch(`${API}/add_expense`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            title: document.getElementById("expTitle").value,
+            title: title,
             category: document.getElementById("expCategory").value,
-            amount: document.getElementById("expAmount").value,
+            amount: amount,
             date: document.getElementById("expDate").value
         })
-    }).then(loadExpenses);
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            // Clear form on success
+            document.getElementById("expTitle").value = "";
+            document.getElementById("expAmount").value = "";
+            document.getElementById("expDate").value = "";
+            alert("Expense added successfully!");
+            loadExpenses();
+            loadExpenseSummary();
+            loadExpenseBreakdown();
+        }
+    })
+    .catch(error => {
+        alert("Network error: " + error.message);
+    });
 }
 
 function loadExpenses() {
