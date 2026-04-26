@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -35,6 +36,7 @@ db_path = os.path.join(db_folder, "ledger.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 
 db_url = os.getenv("DATABASE_URL")
+REMOTE_API_URL = os.getenv("REMOTE_API_URL")
 
 if db_url:
     # Render fix (important)
@@ -45,6 +47,9 @@ if db_url:
     print("🚀 Using PostgreSQL")
 else:
     print("💻 Using SQLite (local)")
+
+if REMOTE_API_URL:
+    print(f"🌐 Remote API proxy enabled: {REMOTE_API_URL}")
 
 db = SQLAlchemy(app)
 
@@ -99,6 +104,17 @@ def add_column_if_missing(table_name, column_name, column_sql):
         return True
     return False
 
+
+def proxy_request(method, path, **kwargs):
+    if not REMOTE_API_URL:
+        return None
+    url = REMOTE_API_URL.rstrip('/') + path
+    response = requests.request(method, url, timeout=20, **kwargs)
+    try:
+        return jsonify(response.json()), response.status_code
+    except ValueError:
+        return response.text, response.status_code
+
 # ================= CACHE CONTROL =================
 @app.after_request
 def add_cache_control(response):
@@ -118,6 +134,9 @@ def home():
 # -------- ADD ENTRY --------
 @app.route('/add_entry', methods=['POST'])
 def add_entry():
+    if REMOTE_API_URL:
+        return proxy_request('POST', '/add_entry', json=request.get_json())
+
     data = request.json
 
     name = data.get('customer_name')
@@ -155,6 +174,9 @@ def add_entry():
 # -------- GET ENTRIES --------
 @app.route('/get_entries')
 def get_entries():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/get_entries', params=request.args)
+
     type_ = request.args.get("type", "customer")
 
     entries = Ledger.query.filter_by(entry_type=type_)\
@@ -174,6 +196,9 @@ def get_entries():
 # -------- UPDATE --------
 @app.route('/update_entry/<int:id>', methods=['PUT'])
 def update_entry(id):
+    if REMOTE_API_URL:
+        return proxy_request('PUT', f'/update_entry/{id}', json=request.get_json())
+
     data = request.json
     entry = Ledger.query.get(id)
 
@@ -203,6 +228,9 @@ def update_entry(id):
 # -------- DELETE --------
 @app.route('/delete_entry/<int:id>', methods=['DELETE'])
 def delete_entry(id):
+    if REMOTE_API_URL:
+        return proxy_request('DELETE', f'/delete_entry/{id}')
+
     entry = Ledger.query.get(id)
 
     if not entry:
@@ -332,6 +360,9 @@ def import_data():
 # -------- DASHBOARD --------
 @app.route('/total_summary')
 def total_summary():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/total_summary', params=request.args)
+
     type_ = request.args.get("type", "customer")
 
     entries = Ledger.query.filter_by(entry_type=type_).all()
@@ -349,6 +380,9 @@ def total_summary():
 # -------- EXPENSE --------
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
+    if REMOTE_API_URL:
+        return proxy_request('POST', '/add_expense', json=request.get_json())
+
     data = request.json
 
     exp = Expense(
@@ -365,6 +399,9 @@ def add_expense():
 
 @app.route('/get_expenses')
 def get_expenses():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/get_expenses', params=request.args)
+
     expenses = Expense.query.order_by(Expense.id.desc()).all()
 
     return jsonify([{
@@ -375,6 +412,9 @@ def get_expenses():
 
 @app.route('/expense_breakdown')
 def expense_breakdown():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/expense_breakdown', params=request.args)
+
     from datetime import datetime, timedelta
 
     period = request.args.get("period", "last_month")
@@ -421,6 +461,9 @@ def test_db():
 
 @app.route('/summary')
 def summary():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/summary', params=request.args)
+
     type_ = request.args.get("type", "customer")
 
     entries = Ledger.query.filter_by(entry_type=type_).all()
@@ -438,6 +481,9 @@ def summary():
 
 @app.route('/expense_summary')
 def expense_summary():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/expense_summary', params=request.args)
+
     from datetime import datetime, timedelta
 
     period = request.args.get("period", "month")
@@ -463,6 +509,9 @@ def expense_summary():
 
 @app.route('/expenses_by_range')
 def expenses_by_range():
+    if REMOTE_API_URL:
+        return proxy_request('GET', '/expenses_by_range', params=request.args)
+
     from datetime import datetime, timedelta
 
     start = request.args.get("start")
