@@ -19,6 +19,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.webkit.WebView;
 
 
 
@@ -40,6 +41,9 @@ public class LauncherActivity
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
+        
+        // Disable WebView cache to ensure fresh data is always fetched
+        WebView.setWebContentsDebuggingEnabled(false);
     }
 
     @Override
