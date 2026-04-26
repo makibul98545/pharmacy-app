@@ -58,6 +58,8 @@ class Ledger(db.Model):
     current_purchase = db.Column(db.Float)
     payment = db.Column(db.Float)
     balance = db.Column(db.Float)
+    previous_balance = db.Column(db.Float, default=0)  # Balance before this entry
+    total = db.Column(db.Float, default=0)  # Total purchase amount
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -93,7 +95,7 @@ def add_entry():
     data = request.json
 
     name = data.get('customer_name')
-    type_ = data.get("type", "customer")
+    type_ = data.get("type") or data.get("entry_type") or "customer"
 
     if not name:
         return jsonify({"error": "Name required"}), 400
@@ -104,8 +106,8 @@ def add_entry():
     last = Ledger.query.filter_by(customer_name=name, entry_type=type_)\
         .order_by(Ledger.id.desc()).first()
 
-    prev = last.balance if last else 0
-    balance = prev + purchase - payment
+    prev_balance = last.balance if last else 0
+    balance = prev_balance + purchase - payment
 
     entry = Ledger(
         entry_type=type_,
@@ -114,7 +116,9 @@ def add_entry():
         date=parse_datetime(data.get("date")) if data.get("date") else datetime.now(),
         current_purchase=purchase,
         payment=payment,
-        balance=balance
+        balance=balance,
+        previous_balance=prev_balance,
+        total=purchase  # Current purchase amount
     )
 
     db.session.add(entry)
