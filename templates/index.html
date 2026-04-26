@@ -46,6 +46,7 @@
         <button onclick="navigateTo('summarySection')">📊 Summary</button>
         <button onclick="navigateTo('expenseSection')">💸 Expense</button>
         <button onclick="navigateTo('reminderSection')">📩 Reminders</button>
+        <button onclick="navigateTo('backupSection')">💾 Backup</button>
         <button id="themeBtn">🌙 Dark Mode</button>
     </div>
 
@@ -187,6 +188,19 @@
                     <button onclick="sendBulkCustomerReminder()">Send Bulk</button>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- BACKUP -->
+        <div id="backupSection" class="screen">
+            <h2>Backup Data</h2>
+
+            <div class="cards">
+                <div class="card blue">
+                    <h3>💾 Export All Data</h3>
+                    <p>Download a JSON file containing all your ledger entries and expenses.</p>
+                    <button onclick="exportData()">Download Backup</button>
+                </div>
             </div>
         </div>
 

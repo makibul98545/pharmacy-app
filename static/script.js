@@ -410,6 +410,32 @@ function toggleTheme() {
     }
 }
 
+function exportData() {
+    fetch(`${API}/export_data`, {
+        cache: 'no-cache'
+    })
+    .then(res => res.json())
+    .then(data => {
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pharmacy-ledger-backup-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("Backup downloaded successfully!");
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error downloading backup");
+    });
+}
+
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/static/sw.js")
         .then(() => console.log("Service Worker Registered"));
