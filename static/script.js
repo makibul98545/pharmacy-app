@@ -58,10 +58,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     entryType.addEventListener("change", function () {
-        updateDashboardLabels(this.value);
+        const selectedType = this.value;
+        const typeText = selectedType === "customer" ? "Customer (Sales)" : "Distributor (Purchases)";
+        
+        // Show loading indicator
+        const tableBody = document.getElementById("ledgerTableBody");
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;">Loading ${typeText}...</td></tr>`;
+        }
+        
+        updateDashboardLabels(selectedType);
         loadDashboard();
         loadEntries();
         loadSummary();
+        // Auto-navigate to table section when type changes so user can see updated data
+        navigateTo("tableSection");
     });
 
     navigateTo("topSection");
@@ -156,6 +167,9 @@ function addEntry() {
         // RELOAD DATA
         loadEntries();
         loadDashboard();
+        
+        // Navigate to table section to show the new entry
+        navigateTo("tableSection");
     })
     .catch(err => {
         console.error(err);
