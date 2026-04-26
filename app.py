@@ -237,6 +237,7 @@ def import_data():
                 customer_name=entry_data['customer_name'],
                 phone=entry_data.get('phone', ''),
                 date=parse_datetime(entry_data.get('date')),
+                previous_balance=0,  # Required field
                 current_purchase=float(entry_data.get('current_purchase', 0)),
                 payment=float(entry_data.get('payment', 0)),
                 balance=0  # Will be recalculated
