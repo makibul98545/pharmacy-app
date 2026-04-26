@@ -221,29 +221,46 @@ def migrate_db():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+# -------- DEBUG COLUMNS --------
+@app.route('/debug_columns')
+def debug_columns():
+    """Debug: Show all columns in ledger table"""
+    try:
+        from sqlalchemy import text
+        result = db.session.execute(text("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='ledger' ORDER BY ordinal_position"))
+        columns = [{"name": row[0], "type": row[1], "nullable": row[2]} for row in result]
+        return jsonify(columns)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # -------- IMPORT DATA (FOR MIGRATION) --------
 @app.route('/import_data', methods=['POST'])
 def import_data():
     try:
+        from sqlalchemy import text
         data = request.json
         if not data or 'entries' not in data:
             return jsonify({"error": "No entries provided"}), 400
 
         imported_count = 0
         for entry_data in data['entries']:
-            # Create entry
-            entry = Ledger(
-                entry_type=entry_data.get('type', 'customer'),
-                customer_name=entry_data['customer_name'],
-                phone=entry_data.get('phone', ''),
-                date=parse_datetime(entry_data.get('date')),
-                previous_balance=0,  # Required field
-                current_purchase=float(entry_data.get('current_purchase', 0)),
-                total=float(entry_data.get('current_purchase', 0)),  # Required field
-                payment=float(entry_data.get('payment', 0)),
-                balance=0  # Will be recalculated
-            )
-            db.session.add(entry)
+            # Use raw SQL to avoid SQLAlchemy field mapping issues
+            sql = """
+            INSERT INTO ledger (entry_type, customer_name, phone, date, previous_balance, current_purchase, total, payment, balance)
+            VALUES (:entry_type, :customer_name, :phone, :date, :previous_balance, :current_purchase, :total, :payment, :balance)
+            """
+            
+            db.session.execute(text(sql), {
+                'entry_type': entry_data.get('type', 'customer'),
+                'customer_name': entry_data['customer_name'],
+                'phone': entry_data.get('phone', ''),
+                'date': parse_datetime(entry_data.get('date')),
+                'previous_balance': 0,
+                'current_purchase': float(entry_data.get('current_purchase', 0)),
+                'total': float(entry_data.get('current_purchase', 0)),
+                'payment': float(entry_data.get('payment', 0)),
+                'balance': 0  # Will be recalculated
+            })
             imported_count += 1
 
         db.session.commit()
