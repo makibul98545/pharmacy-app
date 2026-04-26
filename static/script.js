@@ -436,6 +436,31 @@ function exportData() {
     });
 }
 
+function exportHTML() {
+    fetch(`${API}/export_html`, {
+        cache: 'no-cache'
+    })
+    .then(res => res.text())
+    .then(htmlContent => {
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pharmacy-ledger-backup-${new Date().toISOString().slice(0,10)}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        alert("HTML backup downloaded successfully!");
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error downloading HTML backup. Try manual backup instead.");
+    });
+}
+
 function showManualBackup() {
     fetch(`${API}/export_data`, {
         cache: 'no-cache'

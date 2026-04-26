@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, make_response
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -613,39 +613,125 @@ def expenses_by_range():
         ]
     })
 
-@app.route('/export_data')
-def export_data():
+@app.route('/export_html')
+def export_html():
     if REMOTE_API_URL:
-        return proxy_request('GET', '/export_data')
+        return proxy_request('GET', '/export_html')
 
-    # Export all ledger entries
+    # Export all ledger entries and expenses as HTML
     ledger_entries = Ledger.query.order_by(Ledger.id.asc()).all()
     expenses = Expense.query.order_by(Expense.id.asc()).all()
 
-    data = {
-        "ledger": [{
-            "id": e.id,
-            "entry_type": e.entry_type,
-            "customer_name": e.customer_name,
-            "phone": e.phone,
-            "date": e.date.strftime("%Y-%m-%d %H:%M:%S.%f"),
-            "current_purchase": e.current_purchase,
-            "payment": e.payment,
-            "balance": e.balance,
-            "previous_balance": e.previous_balance,
-            "total": e.total
-        } for e in ledger_entries],
-        "expenses": [{
-            "id": e.id,
-            "title": e.title,
-            "category": e.category,
-            "amount": e.amount,
-            "date": e.date.strftime("%Y-%m-%d %H:%M:%S.%f")
-        } for e in expenses],
-        "exported_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+    # Calculate totals
+    total_ledger = len(ledger_entries)
+    total_expenses = len(expenses)
+    total_ledger_value = sum((e.current_purchase or 0) - (e.payment or 0) for e in ledger_entries)
+    total_expenses_value = sum(e.amount or 0 for e in expenses)
 
-    return jsonify(data)
+    html_content = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Ledger Backup - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; }}
+        h1, h2 {{ color: #333; }}
+        table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+        th {{ background-color: #f2f2f2; }}
+        .summary {{ background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+        .customer {{ background-color: #fff2e8; }}
+        .distributor {{ background-color: #f0f8e8; }}
+    </style>
+</head>
+<body>
+    <h1>Pharmacy Ledger Backup</h1>
+    <p><strong>Exported on:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+
+    <div class="summary">
+        <h2>Summary</h2>
+        <p><strong>Total Ledger Entries:</strong> {total_ledger}</p>
+        <p><strong>Total Expenses:</strong> {total_expenses}</p>
+        <p><strong>Net Ledger Balance:</strong> ₹{total_ledger_value:.2f}</p>
+        <p><strong>Total Expenses:</strong> ₹{total_expenses_value:.2f}</p>
+    </div>
+
+    <h2>Ledger Entries</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Date</th>
+                <th>Purchase</th>
+                <th>Payment</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+"""
+
+    for entry in ledger_entries:
+        row_class = "customer" if entry.entry_type == "customer" else "distributor"
+        html_content += f"""
+            <tr class="{row_class}">
+                <td>{entry.id}</td>
+                <td>{entry.entry_type.title()}</td>
+                <td>{entry.customer_name}</td>
+                <td>{entry.phone or ''}</td>
+                <td>{entry.date.strftime('%Y-%m-%d %H:%M')}</td>
+                <td>₹{entry.current_purchase or 0:.2f}</td>
+                <td>₹{entry.payment or 0:.2f}</td>
+                <td>₹{entry.balance or 0:.2f}</td>
+            </tr>
+"""
+
+    html_content += """
+        </tbody>
+    </table>
+
+    <h2>Expenses</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+"""
+
+    for expense in expenses:
+        html_content += f"""
+            <tr>
+                <td>{expense.id}</td>
+                <td>{expense.title}</td>
+                <td>{expense.category or 'other'}</td>
+                <td>₹{expense.amount or 0:.2f}</td>
+                <td>{expense.date.strftime('%Y-%m-%d %H:%M')}</td>
+            </tr>
+"""
+
+    html_content += """
+        </tbody>
+    </table>
+
+    <p><em>This backup was generated by Pharmacy Ledger App</em></p>
+</body>
+</html>
+"""
+
+    response = make_response(html_content)
+    response.headers['Content-Type'] = 'text/html'
+    response.headers['Content-Disposition'] = f'attachment; filename=pharmacy-ledger-backup-{datetime.now().strftime("%Y-%m-%d")}.html'
+    return response
 
 from flask import send_from_directory
 
