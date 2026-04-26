@@ -73,6 +73,32 @@ with app.app_context():
     db.create_all()
     print("✅ Database created at:", db_path)
 
+# ================= SCHEMA HELPERS =================
+def get_table_columns(table_name):
+    from sqlalchemy import text
+    engine = db.engine
+    dialect = engine.dialect.name
+
+    if dialect == 'sqlite':
+        result = db.session.execute(text(f"PRAGMA table_info({table_name})"))
+        return [row[1] for row in result]
+
+    result = db.session.execute(text(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_name = :table_name ORDER BY ordinal_position"
+    ), {"table_name": table_name})
+    return [row[0] for row in result]
+
+
+def add_column_if_missing(table_name, column_name, column_sql):
+    columns = get_table_columns(table_name)
+    if column_name not in columns:
+        from sqlalchemy import text
+        db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_sql}"))
+        db.session.commit()
+        return True
+    return False
+
 # ================= CACHE CONTROL =================
 @app.after_request
 def add_cache_control(response):
@@ -208,18 +234,18 @@ def delete_entry(id):
 def migrate_db():
     """Add missing columns to database"""
     try:
-        from sqlalchemy import text
+        added = []
 
-        # Check if entry_type column exists
-        result = db.session.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='ledger' AND column_name='entry_type'"))
+        if add_column_if_missing('ledger', 'entry_type', "entry_type VARCHAR(20) DEFAULT 'customer'"):
+            added.append('entry_type')
+        if add_column_if_missing('ledger', 'previous_balance', 'previous_balance FLOAT DEFAULT 0'):
+            added.append('previous_balance')
+        if add_column_if_missing('ledger', 'total', 'total FLOAT DEFAULT 0'):
+            added.append('total')
 
-        if not result.fetchone():
-            # Add entry_type column with default value
-            db.session.execute(text("ALTER TABLE ledger ADD COLUMN entry_type VARCHAR(20) DEFAULT 'customer'"))
-            db.session.commit()
-            return jsonify({"message": "entry_type column added successfully"})
-        else:
-            return jsonify({"message": "entry_type column already exists"})
+        if added:
+            return jsonify({"message": f"Added columns: {', '.join(added)}"})
+        return jsonify({"message": "All required columns already exist"})
 
     except Exception as e:
         db.session.rollback()
@@ -230,10 +256,8 @@ def migrate_db():
 def debug_columns():
     """Debug: Show all columns in ledger table"""
     try:
-        from sqlalchemy import text
-        result = db.session.execute(text("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name='ledger' ORDER BY ordinal_position"))
-        columns = [{"name": row[0], "type": row[1], "nullable": row[2]} for row in result]
-        return jsonify(columns)
+        columns = get_table_columns('ledger')
+        return jsonify({"columns": columns})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
