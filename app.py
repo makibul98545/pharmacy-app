@@ -115,6 +115,76 @@ def proxy_request(method, path, **kwargs):
     except ValueError:
         return response.text, response.status_code
 
+@app.route('/import_data', methods=['POST'])
+def import_data():
+    if REMOTE_API_URL:
+        return proxy_request('POST', '/import_data', json=request.get_json())
+
+    try:
+        data = request.json
+        if not data or 'ledger' not in data:
+            return jsonify({"error": "Invalid data format"}), 400
+
+        imported_ledger = 0
+        imported_expenses = 0
+
+        # Import ledger entries
+        if 'ledger' in data:
+            for entry in data['ledger']:
+                # Skip if entry already exists (by checking customer_name, date, and amount)
+                existing = Ledger.query.filter_by(
+                    customer_name=entry['customer_name'],
+                    date=parse_datetime(entry['date']),
+                    current_purchase=entry.get('current_purchase', 0)
+                ).first()
+
+                if not existing:
+                    ledger_entry = Ledger(
+                        entry_type=entry.get('entry_type', 'customer'),
+                        customer_name=entry['customer_name'],
+                        phone=entry.get('phone', ''),
+                        date=parse_datetime(entry['date']),
+                        current_purchase=entry.get('current_purchase', 0),
+                        payment=entry.get('payment', 0),
+                        balance=entry.get('balance', 0),
+                        previous_balance=entry.get('previous_balance', 0),
+                        total=entry.get('total', 0)
+                    )
+                    db.session.add(ledger_entry)
+                    imported_ledger += 1
+
+        # Import expenses
+        if 'expenses' in data:
+            for expense in data['expenses']:
+                # Skip if expense already exists
+                existing = Expense.query.filter_by(
+                    title=expense['title'],
+                    date=parse_datetime(expense['date']),
+                    amount=expense['amount']
+                ).first()
+
+                if not existing:
+                    expense_entry = Expense(
+                        title=expense['title'],
+                        category=expense.get('category', 'other'),
+                        amount=expense['amount'],
+                        date=parse_datetime(expense['date'])
+                    )
+                    db.session.add(expense_entry)
+                    imported_expenses += 1
+
+        db.session.commit()
+
+        return jsonify({
+            "message": f"Imported {imported_ledger} ledger entries and {imported_expenses} expenses",
+            "ledger_count": imported_ledger,
+            "expenses_count": imported_expenses
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
 # ================= CACHE CONTROL =================
 @app.after_request
 def add_cache_control(response):
@@ -289,9 +359,9 @@ def debug_columns():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# -------- IMPORT DATA (FOR MIGRATION) --------
-@app.route('/import_data', methods=['POST'])
-def import_data():
+# -------- IMPORT ENTRIES (FOR MIGRATION) --------
+@app.route('/import_entries', methods=['POST'])
+def import_entries():
     try:
         from sqlalchemy import text
         data = request.json

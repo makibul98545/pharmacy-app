@@ -432,8 +432,74 @@ function exportData() {
     })
     .catch(err => {
         console.error(err);
-        alert("Error downloading backup");
+        alert("Error downloading backup. Try manual backup instead.");
     });
+}
+
+function showManualBackup() {
+    fetch(`${API}/export_data`, {
+        cache: 'no-cache'
+    })
+    .then(res => res.json())
+    .then(data => {
+        const jsonString = JSON.stringify(data, null, 2);
+        document.getElementById("backupData").value = jsonString;
+        document.getElementById("backupData").style.display = "block";
+        document.getElementById("copyBtn").style.display = "block";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error loading backup data");
+    });
+}
+
+function copyBackupData() {
+    const textarea = document.getElementById("backupData");
+    textarea.select();
+    document.execCommand("copy");
+    alert("Backup data copied to clipboard!");
+}
+
+function restoreData() {
+    const jsonText = document.getElementById("restoreData").value.trim();
+    if (!jsonText) {
+        alert("Please paste backup data first");
+        return;
+    }
+
+    try {
+        const data = JSON.parse(jsonText);
+        
+        if (!confirm(`This will import ${data.ledger?.length || 0} ledger entries and ${data.expenses?.length || 0} expenses. Continue?`)) {
+            return;
+        }
+
+        fetch(`${API}/import_data`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.error) {
+                alert("Error: " + result.error);
+            } else {
+                alert(result.message);
+                // Clear the textarea
+                document.getElementById("restoreData").value = "";
+                // Reload data
+                loadEntries();
+                loadDashboard();
+                loadExpenses();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error restoring data");
+        });
+    } catch (e) {
+        alert("Invalid JSON format: " + e.message);
+    }
 }
 
 if ("serviceWorker" in navigator) {

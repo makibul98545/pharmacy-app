@@ -197,9 +197,24 @@
 
             <div class="cards">
                 <div class="card blue">
-                    <h3>💾 Export All Data</h3>
+                    <h3>💾 Download Backup</h3>
                     <p>Download a JSON file containing all your ledger entries and expenses.</p>
                     <button onclick="exportData()">Download Backup</button>
+                </div>
+
+                <div class="card green">
+                    <h3>📋 Manual Backup</h3>
+                    <p>Copy the JSON data below to save manually:</p>
+                    <button onclick="showManualBackup()">Show Backup Data</button>
+                    <textarea id="backupData" style="width:100%;height:200px;margin-top:10px;display:none;" readonly></textarea>
+                    <button onclick="copyBackupData()" id="copyBtn" style="display:none;margin-top:5px;">Copy to Clipboard</button>
+                </div>
+
+                <div class="card yellow">
+                    <h3>📤 Restore Data</h3>
+                    <p>Paste JSON backup data below to restore:</p>
+                    <textarea id="restoreData" placeholder="Paste your backup JSON data here..." style="width:100%;height:200px;margin-top:10px;"></textarea>
+                    <button onclick="restoreData()" style="margin-top:5px;">Restore Data</button>
                 </div>
             </div>
         </div>
