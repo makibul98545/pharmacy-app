@@ -9,6 +9,21 @@ import sys
 from flask import Flask
 from models import db
 
+def get_table_columns(table_name):
+    from sqlalchemy import text
+    engine = db.engine
+    dialect = engine.dialect.name
+
+    if dialect == 'sqlite':
+        result = db.session.execute(text(f"PRAGMA table_info({table_name})"))
+        return [row[1] for row in result]
+
+    result = db.session.execute(text(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_name = :table_name ORDER BY ordinal_position"
+    ), {"table_name": table_name})
+    return [row[0] for row in result]
+
 def run_migration():
     """Add missing columns to database"""
 
@@ -33,11 +48,9 @@ def run_migration():
 
     with app.app_context():
         try:
-            # Check if entry_type column exists
-            from sqlalchemy import text
-            result = db.session.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='ledger' AND column_name='entry_type'"))
-
-            if not result.fetchone():
+            # Check if entry_type column exists in ledger
+            columns = get_table_columns('ledger')
+            if 'entry_type' not in columns:
                 print("Adding entry_type column...")
                 # Add entry_type column with default value
                 db.session.execute(text("ALTER TABLE ledger ADD COLUMN entry_type VARCHAR(20) DEFAULT 'customer'"))
@@ -45,6 +58,17 @@ def run_migration():
                 print("✅ entry_type column added successfully")
             else:
                 print("✅ entry_type column already exists")
+
+            # Check if category column exists in expense
+            columns = get_table_columns('expense')
+            if 'category' not in columns:
+                print("Adding category column to expense table...")
+                # Add category column with default value
+                db.session.execute(text("ALTER TABLE expense ADD COLUMN category VARCHAR(50) DEFAULT 'other'"))
+                db.session.commit()
+                print("✅ category column added successfully")
+            else:
+                print("✅ category column already exists")
 
             print("🎉 Database migration completed!")
 

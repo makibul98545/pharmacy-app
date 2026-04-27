@@ -17,5 +17,6 @@ class Ledger(db.Model):
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
+    category = db.Column(db.String(50))
     amount = db.Column(db.Float)
     date = db.Column(db.DateTime)

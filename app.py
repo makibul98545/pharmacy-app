@@ -104,6 +104,20 @@ def add_column_if_missing(table_name, column_name, column_sql):
         return True
     return False
 
+with app.app_context():
+    added_columns = []
+    if add_column_if_missing('ledger', 'entry_type', "entry_type VARCHAR(20) DEFAULT 'customer'"):
+        added_columns.append('ledger.entry_type')
+    if add_column_if_missing('ledger', 'previous_balance', 'previous_balance FLOAT DEFAULT 0'):
+        added_columns.append('ledger.previous_balance')
+    if add_column_if_missing('ledger', 'total', 'total FLOAT DEFAULT 0'):
+        added_columns.append('ledger.total')
+    if add_column_if_missing('expense', 'category', "category VARCHAR(50) DEFAULT 'other'"):
+        added_columns.append('expense.category')
+
+    if added_columns:
+        print("✅ Migrated columns:", ', '.join(added_columns))
+
 
 def proxy_request(method, path, **kwargs):
     if not REMOTE_API_URL:
@@ -335,11 +349,13 @@ def migrate_db():
         added = []
 
         if add_column_if_missing('ledger', 'entry_type', "entry_type VARCHAR(20) DEFAULT 'customer'"):
-            added.append('entry_type')
+            added.append('ledger.entry_type')
         if add_column_if_missing('ledger', 'previous_balance', 'previous_balance FLOAT DEFAULT 0'):
-            added.append('previous_balance')
+            added.append('ledger.previous_balance')
         if add_column_if_missing('ledger', 'total', 'total FLOAT DEFAULT 0'):
-            added.append('total')
+            added.append('ledger.total')
+        if add_column_if_missing('expense', 'category', "category VARCHAR(50) DEFAULT 'other'"):
+            added.append('expense.category')
 
         if added:
             return jsonify({"message": f"Added columns: {', '.join(added)}"})
@@ -472,7 +488,7 @@ def add_expense():
             title=data['title'].strip(),
             category=data.get('category', 'other'),
             amount=amount,
-            date=datetime.fromisoformat(data.get("date")) if data.get("date") else datetime.now()
+            date=parse_datetime(data.get("date"))
         )
 
         db.session.add(exp)
