@@ -1,0 +1,21 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "model": "ollama/qwen3:8b",
+  "provider": {
+    "ollama": {
+      "options": {
+        "baseURL": "http://127.0.0.1:11434"
+      },
+      "models": {
+        "qwen3:8b": {
+          "name": "Qwen3 8B Agent",
+          "tool_call": true,
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        }
+      }
+    }
+  }
+}
