@@ -33,6 +33,10 @@ class _ExcelAppShellState extends State<ExcelAppShell> {
   String? _selectionAnchor;
   String? _selectionEnd;
   bool _isDraggingSelection = false;
+  // ============================================================
+  // COLUMN WIDTHS
+  // ============================================================
+  final List<double> _columnWidths = List<double>.filled(26, 70.0);
 
   void _updateSelectionFromPointer(Offset localPosition) {
     // Row header width.
@@ -128,6 +132,14 @@ class _ExcelAppShellState extends State<ExcelAppShell> {
         const SnackBar(content: Text('XLSX exported successfully.')),
       );
     }
+  }
+
+  double _getColumnWidth(int column) {
+    if (column < 0 || column >= _columnWidths.length) {
+      return 70.0 * _zoom;
+    }
+
+    return _columnWidths[column] * _zoom;
   }
 
   void _showInsertMenu() {
@@ -3255,7 +3267,7 @@ class _ExcelAppShellState extends State<ExcelAppShell> {
         // ZOOM-AWARE DIMENSIONS
         // ============================================================
         final double rowHeaderWidth = 45.0 * _zoom;
-        final double columnWidth = 70.0 * _zoom;
+        final columnWidth = 70.0 * _zoom;
         final double rowHeight = 24.0 * _zoom;
 
         // ============================================================
@@ -3345,7 +3357,9 @@ class _ExcelAppShellState extends State<ExcelAppShell> {
                       );
                     }
 
-                    return TableSpan(extent: FixedTableSpanExtent(columnWidth));
+                    return TableSpan(
+                      extent: FixedTableSpanExtent(_getColumnWidth(column - 1)),
+                    );
                   },
 
                   // ========================================================
@@ -3395,7 +3409,10 @@ class _ExcelAppShellState extends State<ExcelAppShell> {
                         '${_columnName(actualColumn - 1)}$actualRow';
 
                     return TableViewCell(
-                      child: _buildCell(address, columnWidth),
+                      child: _buildCell(
+                        address,
+                        _getColumnWidth(actualColumn - 1),
+                      ),
                     );
                   },
                 ),
