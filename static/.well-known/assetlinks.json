@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.mmlifecare.pharmacyledger",
+      "sha256_cert_fingerprints": [
+        "25:6C:72:6F:BD:EF:BE:22:34:13:65:1E:D2:75:BA:F3:57:92:3D:E5:37:B1:99:F6:92:4F:E5:DD:00:81:3A:FE"
+      ]
+    }
+  }
+]

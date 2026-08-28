@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MM LifeCare Medical Ledger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+</head>
+<body>
+
+<div id="app-loader" style="
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  font-family:Arial, sans-serif;
+">
+  <div style="text-align:center;">
+    <div style="
+      width:40px;
+      height:40px;
+      border:4px solid #ccc;
+      border-top:4px solid #0d6efd;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+      margin:auto;
+    "></div>
+    <p style="margin-top:10px;">Loading...</p>
+  </div>
+</div>    
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>MM LifeCare Medical Ledger</h2>
+
+        <button onclick="navigateTo('topSection')">🏠 Dashboard</button>
+        <button onclick="navigateTo('formSection')">➕ Add Entry</button>
+        <button onclick="navigateTo('tableSection')">📋 Ledger</button>
+        <button onclick="navigateTo('summarySection')">📊 Summary</button>
+        <button onclick="navigateTo('expenseSection')">💸 Expense</button>
+        <button onclick="navigateTo('reminderSection')">📩 Reminders</button>
+        <button onclick="navigateTo('backupSection')">💾 Backup</button>
+        <button id="themeBtn">🌙 Dark Mode</button>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- DASHBOARD -->
+        <div id="topSection" class="screen active">
+            <h2>Dashboard</h2>
+            <div class="cards">
+                <div class="card blue">
+                    <h4>Total Purchase</h4>
+                    <p id="cardPurchase">0</p>
+                </div>
+                <div class="card green">
+                    <h4>Total Payment</h4>
+                    <p id="cardPayment">0</p>
+                </div>
+                <div class="card yellow">
+                    <h4>Net Balance</h4>
+                    <p id="cardNet">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM -->
+        <div id="formSection" class="screen">
+            <h2>Add Entry</h2>
+            <select id="entryType">
+                <option value="customer">Customer (Sale)</option>
+                <option value="distributor">Distributor (Purchase)</option>
+            </select>
+            <div class="form-grid">
+                <input type="datetime-local" id="date">
+                <input id="name" placeholder="Customer Name">
+                <input id="phone" placeholder="Phone Number">
+                <input id="purchase" placeholder="Purchase">
+                <input id="payment" placeholder="Payment">
+            </div>
+            <button class="primary" onclick="addEntry()">Add Entry</button>
+        </div>
+
+        <!-- LEDGER -->
+        <div id="tableSection" class="screen">
+            <h2>Ledger</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>                                                        
+                            <th>Previous</th>
+                            <th>Sale</th>
+                            <th>Payment</th>
+                            <th>Balance</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div id="summarySection" class="screen">
+            <h2>Summary</h2>
+            <div id="summaryBox" class="summary-box"></div>
+        </div>
+
+        <!-- EXPENSE -->
+        <div id="expenseSection" class="screen">
+
+            <div style="margin:10px 0;">
+                <b>Custom Range:</b><br>
+                <input type="date" id="rangeStart">
+                <input type="date" id="rangeEnd">
+                <button onclick="loadExpenseRange()">Filter</button>
+            </div>
+
+            <div id="rangeResult" style="margin-top:10px;"></div>
+
+            <div style="margin-bottom:10px;">
+                <select id="expenseFilter" onchange="loadExpenseSummary()">
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>    
+
+            <div id="expenseSummary" style="margin-top:10px;font-weight:bold;"></div>
+
+            <h2>Expense</h2>
+            
+            <div style="margin-bottom:10px;">
+                <select id="expensePeriod" onchange="loadExpenseBreakdown()">
+                    <option value="last_week">Last Week</option>
+                    <option value="last_month" selected>Last Month</option>
+                    <option value="last_year">Last Year</option>
+                </select>
+            </div>
+
+            <div class="form-grid">
+                <input id="expTitle" placeholder="Expense Title">
+                <select id="expCategory">
+                    <option value="fuel">Fuel</option>
+                    <option value="rent">Rent</option>
+                    <option value="salary">Salary</option>
+                    <option value="other">Other</option>
+                </select>               
+                <input id="expAmount" placeholder="Amount">
+                <input type="datetime-local" id="expDate">
+            </div>
+
+            <div id="expenseBreakdown" style="margin-top:10px;"></div>
+            <button class="primary" onclick="addExpense()">Add Expense</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTable"></tbody>
+            </table>
+        </div>
+
+        <!-- REMINDERS -->
+        <div id="reminderSection" class="screen">
+            <h2>Reminders</h2>
+
+            <div class="cards">
+
+                <!-- Distributor -->
+                <div class="card blue">
+                    <h3>📦 Distributor Due</h3>
+                    <input id="distName" placeholder="Distributor Name">
+                    <input id="distPhone" placeholder="Phone Number">
+                    <input id="distAmount" placeholder="Amount">
+                    <button onclick="sendDistributorReminder()">Send Reminder</button>
+                </div>
+
+                <!-- Customer -->
+                <div class="card green">
+                    <h3>👤 Customer Due</h3>
+                    <p>Use ledger WhatsApp or send all:</p>
+                    <button onclick="sendBulkCustomerReminder()">Send Bulk</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- BACKUP -->
+        <div id="backupSection" class="screen">
+            <h2>Backup Data</h2>
+
+            <div class="cards">
+                <div class="card blue">
+                    <h3>💾 Download Backup</h3>
+                    <p>Download your data as files:</p>
+                    <button onclick="exportData()">Download JSON</button>
+                    <button onclick="exportHTML()" style="margin-left:10px;">Download HTML</button>
+                    <p style="font-size:12px;margin-top:10px;color:#666;">
+                        <strong>Mobile:</strong> Files save to Downloads folder<br>
+                        <strong>Desktop:</strong> Files save to default download location
+                    </p>
+                </div>
+
+                <div class="card green">
+                    <h3>📋 Manual Backup</h3>
+                    <p>Copy the JSON data below to save manually:</p>
+                    <button onclick="showManualBackup()">Show Backup Data</button>
+                    <textarea id="backupData" style="width:100%;height:200px;margin-top:10px;display:none;" readonly></textarea>
+                    <button onclick="copyBackupData()" id="copyBtn" style="display:none;margin-top:5px;">Copy to Clipboard</button>
+                </div>
+
+                <div class="card yellow">
+                    <h3>📤 Restore Data</h3>
+                    <p>Paste JSON backup data below to restore:</p>
+                    <textarea id="restoreData" placeholder="Paste your backup JSON data here..." style="width:100%;height:200px;margin-top:10px;"></textarea>
+                    <button onclick="restoreData()" style="margin-top:5px;">Restore Data</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+window.addEventListener("load", function () {
+  setTimeout(() => {
+    const loader = document.getElementById("app-loader");
+    if (loader) loader.style.display = "none";
+  }, 200); // smooth fade
+});
+
+// fallback for slow server
+setTimeout(() => {
+  const loader = document.getElementById("app-loader");
+  if (loader) {
+    loader.innerHTML = "<p>Still loading...</p>";
+  }
+}, 4000);
+</script>
+
+</body>
+</html>

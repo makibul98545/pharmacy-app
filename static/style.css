@@ -1,0 +1,278 @@
+:root {
+    --bg-main: #f4f6f9;
+    --bg-sidebar: #1e293b;
+    --bg-card: #ffffff;
+    --text-main: #1e293b;
+    --text-light: #ffffff;
+    --accent: #2563eb;
+}
+
+.dark-theme {
+    --bg-main: #0f172a;
+    --bg-sidebar: #020617;
+    --bg-card: #1e293b;
+    --text-main: #e2e8f0;
+    --text-light: #ffffff;
+    --accent: #3b82f6;
+}
+
+/* -------- BASE -------- */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* -------- SIDEBAR -------- */
+.sidebar {
+    width: 240px;
+    background: var(--bg-sidebar);
+    color: var(--text-light);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.sidebar button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.sidebar button:hover {
+    background: #475569;
+    transform: translateX(3px);
+}
+
+/* -------- MAIN -------- */
+.main {
+    flex: 1;
+    padding: 25px;
+}
+
+.main h2 {
+    margin-top: 0;
+}
+
+/* -------- SCREEN -------- */
+.screen {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.screen.active {
+    display: block !important;
+}
+
+.screen {
+    width: 100%;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* -------- CARDS -------- */
+.cards {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.card {
+    flex: 1;
+    min-width: 220px;
+    padding: 18px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.card h4 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.card p {
+    font-size: 22px;
+    margin-top: 8px;
+    font-weight: bold;
+}
+
+/* Colors */
+.blue { background: #2563eb; }
+.green { background: #16a34a; }
+.yellow { background: #f59e0b; }
+
+/* -------- FORM -------- */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+input {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+}
+
+/* -------- BUTTONS -------- */
+.primary {
+    margin-top: 10px;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.primary:hover {
+    background: #1d4ed8;
+}
+
+/* WhatsApp button */
+button {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* -------- TABLE -------- */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+th {
+    background: #2563eb;
+    color: white;
+    padding: 10px;
+    font-size: 13px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    font-size: 13px;
+}
+
+tr:hover {
+    background: #f1f7ff;
+}
+
+/* Balance coloring */
+td:last-child {
+    font-weight: bold;
+}
+
+/* -------- SUMMARY -------- */
+.summary-box {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+/* -------- THEME TRANSITION (GLOBAL) -------- */
+.sidebar,
+.card,
+table,
+.summary-box,
+input,
+button {
+    transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+/* -------- REMINDER CARDS -------- */
+.card h3 {
+    margin-bottom: 10px;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 768px) {
+
+    .main {
+        padding: 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cards {
+        flex-direction: column;
+    }
+}
+
+/* --- FIX: ensure at least one screen visible --- */
+#topSection {
+    display: block;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
